@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "programs/arena_war",
+]
+resolver = "2"
