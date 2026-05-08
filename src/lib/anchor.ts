@@ -1,0 +1,53 @@
+import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js'
+import { AnchorProvider, Program, setProvider } from '@coral-xyz/anchor'
+import type { AnchorWallet } from '@solana/wallet-adapter-react'
+import IDL_JSON from './arena_war.json'
+
+export const NETWORK = clusterApiUrl('devnet')
+export const CONNECTION = new Connection(NETWORK, 'confirmed')
+
+export const PROGRAM_ID = new PublicKey('At428xvcEnhjVXxensriSeXm7hQo6Kzx7KEgTcPW9o3y')
+
+export const IDL = IDL_JSON as any
+
+export function getProvider(wallet: AnchorWallet): AnchorProvider {
+  const provider = new AnchorProvider(CONNECTION, wallet, {
+    commitment: 'confirmed',
+    preflightCommitment: 'confirmed',
+  })
+  setProvider(provider)
+  return provider
+}
+
+export function getProgram(wallet: AnchorWallet): Program {
+  const provider = getProvider(wallet)
+  return new Program(IDL, PROGRAM_ID, provider)
+}
+
+export async function getArenaPDA(): Promise<[PublicKey, number]> {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('arena_state')],
+    PROGRAM_ID
+  )
+}
+
+export async function getTournamentPDA(organizer: PublicKey, title: string): Promise<[PublicKey, number]> {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('tournament'), organizer.toBuffer(), Buffer.from(title)],
+    PROGRAM_ID
+  )
+}
+
+export async function getPlayerListPDA(tournament: PublicKey): Promise<[PublicKey, number]> {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('player_list'), tournament.toBuffer()],
+    PROGRAM_ID
+  )
+}
+
+export async function getOrgReputationPDA(organizer: PublicKey): Promise<[PublicKey, number]> {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('org_reputation'), organizer.toBuffer()],
+    PROGRAM_ID
+  )
+}

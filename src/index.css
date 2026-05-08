@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base resets ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background-color: #080B10;
+  color: #E5E7EB;
+  font-family: 'DM Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Custom scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar              { width: 6px; height: 6px; }
+::-webkit-scrollbar-track        { background: #080B10; }
+::-webkit-scrollbar-thumb        { background: #1F2937; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover  { background: #374151; }
+
+/* ── Number input: hide arrows ──────────────────────────────────────── */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* ── Wallet adapter modal overrides ────────────────────────────────── */
+.wallet-adapter-modal-wrapper {
+  background: #0D1117 !important;
+  border: 1px solid #1F2937 !important;
+  border-radius: 8px !important;
+}
+.wallet-adapter-modal-title {
+  font-family: 'Chakra Petch', monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  color: #E5E7EB !important;
+}
+.wallet-adapter-button {
+  font-family: 'Chakra Petch', monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 4px !important;
+}
+.wallet-adapter-button-trigger {
+  background-color: #E5202E !important;
+}
+.wallet-adapter-button-trigger:hover {
+  background-color: rgba(229,32,46,0.8) !important;
+}
+.wallet-adapter-modal-list li:hover .wallet-adapter-button {
+  background: rgba(229,32,46,0.1) !important;
+}
+
+/* ── Selection color ────────────────────────────────────────────────── */
+::selection { background: rgba(229,32,46,0.3); color: #fff; }
+
+/* ── Mundial 2026: countdown animations ────────────────────────────── */
+@keyframes pulso-suave {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+@keyframes parpadeo {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+.countdown-critico { animation: parpadeo 0.5s ease-in-out infinite; }

@@ -1,0 +1,13 @@
+import type { Translations } from './es'
+
+const en: Translations = {
+  nav: { arena: 'Arena', create: 'Create', dashboard: 'Dashboard', devnet: 'DEVNET', connect: 'Connect Wallet' },
+  home: { badge: '⚡ POWERED BY SOLANA DEVNET', title1: 'ENTER THE', title2: 'ARENA', subtitle: 'Compete in on-chain tournaments. Pay with SOL. Win or lose — the blockchain never lies.', statPrize: 'TOTAL PRIZE POOL', statOpen: 'OPEN ARENAS', statTotal: 'TOTAL ARENAS', section: 'ACTIVE ARENAS', empty: 'No arenas found for this filter.', filterAll: 'ALL', filterOpen: 'OPEN', filterLive: 'LIVE', filterFinished: 'FINISHED' },
+  card: { entry: 'ENTRY', prize: 'PRIZE', slots: 'SLOTS', players: 'Players', org: 'ORG', join: 'JOIN →', full: 'FULL', ended: 'ENDED', live: 'LIVE', statusOpen: 'OPEN', statusActive: 'LIVE', statusFinished: 'ENDED' },
+  create: { badge: '▶ TOURNAMENT CREATION', title: 'FORGE YOUR ARENA', subtitle: 'Deploy a new tournament on Solana Devnet. 10% protocol fee applies.', labelTitle: 'ARENA TITLE', labelGame: 'GAME MODE', labelFee: 'ENTRY FEE (SOL)', labelPlayers: 'MAX PLAYERS', placeholder: 'DEATH MATCH ALPHA', prizeLabel: 'ESTIMATED PRIZE POOL', walletWarn: 'Connect your Phantom wallet to create a tournament', submit: 'CREATE ARENA ◆', submitting: 'DEPLOYING TO SOLANA…' },
+  dashboard: { badge: '▶ COMMANDER HQ', title: 'DASHBOARD', statCreated: 'CREATED', statJoined: 'JOINED', statEarnings: 'EARNINGS', statWinRate: 'WIN RATE', sectionCreated: 'ARENAS CREATED', sectionJoined: 'ARENAS JOINED', emptyCreated: 'Create your first arena', emptyJoined: 'Browse open arenas', roleOrg: 'ORG', rolePlayer: 'PLAYER', entry: 'ENTRY', prize: 'PRIZE', locked: { title: 'LOCKED', subtitle: 'Connect your Phantom wallet to access your dashboard' } },
+  footer: { network: 'Solana Devnet' },
+  toast: { connectFirst: 'Connect your Phantom wallet first', joining: 'Joining', pending: '— TX pending', walletReady: 'Wallet not ready', fillFields: 'Fill all required fields', feeError: 'Entry fee must be > 0', playersError: 'Need at least 2 players', creating: 'Creating arena on Solana…', created: 'Arena created', txFailed: 'Transaction failed' },
+}
+
+export default en

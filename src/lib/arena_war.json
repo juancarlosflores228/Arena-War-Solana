@@ -1,0 +1,1054 @@
+{
+  "address": "At428xvcEnhjVXxensriSeXm7hQo6Kzx7KEgTcPW9o3y",
+  "metadata": {
+    "name": "arena_war",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Arena War on-chain tournament program"
+  },
+  "instructions": [
+    {
+      "name": "create_tournament",
+      "docs": [
+        "Creates a Tournament PDA and its companion PlayerList PDA.",
+        "The organizer pays a 0.009 SOL creation fee (anti-spam) to the platform",
+        "authority. Players join by paying the entry_fee later.",
+        "`created_at` is stamped with the current on-chain Clock timestamp."
+      ],
+      "discriminator": [
+        158,
+        137,
+        233,
+        231,
+        73,
+        132,
+        191,
+        68
+      ],
+      "accounts": [
+        {
+          "name": "arena_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "tournament",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  117,
+                  114,
+                  110,
+                  97,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organizer"
+              },
+              {
+                "kind": "arg",
+                "path": "title"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_list",
+          "docs": [
+            "Space is pre-allocated for `max_players` pubkeys so `join_tournament`",
+            "never needs a realloc."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament"
+              }
+            ]
+          }
+        },
+        {
+          "name": "org_reputation",
+          "docs": [
+            "Created on the organizer's first tournament; reused for subsequent ones."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103,
+                  95,
+                  114,
+                  101,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organizer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "organizer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "platform_authority",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "entry_fee",
+          "type": "u64"
+        },
+        {
+          "name": "max_players",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "declare_winner",
+      "docs": [
+        "The organizer nominates a winner who must be in the PlayerList.",
+        "Tournament must still be active."
+      ],
+      "discriminator": [
+        140,
+        135,
+        197,
+        50,
+        9,
+        23,
+        4,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "tournament",
+          "docs": [
+            "`has_one = organizer` enforces tournament.organizer == organizer.key()."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  117,
+                  114,
+                  110,
+                  97,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament.organizer",
+                "account": "Tournament"
+              },
+              {
+                "kind": "account",
+                "path": "tournament.title",
+                "account": "Tournament"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_list",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament"
+              }
+            ]
+          }
+        },
+        {
+          "name": "organizer",
+          "signer": true,
+          "relations": [
+            "tournament"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "winner",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "distribute_prizes",
+      "docs": [
+        "The tournament organizer OR the platform authority can call this.",
+        "Splits the escrow:",
+        "80 % → winner",
+        "15 % → organizer",
+        "5 % → platform_authority (arena_state.authority; absorbs rounding dust)"
+      ],
+      "discriminator": [
+        154,
+        99,
+        201,
+        93,
+        82,
+        104,
+        73,
+        232
+      ],
+      "accounts": [
+        {
+          "name": "arena_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "tournament",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  117,
+                  114,
+                  110,
+                  97,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament.organizer",
+                "account": "Tournament"
+              },
+              {
+                "kind": "account",
+                "path": "tournament.title",
+                "account": "Tournament"
+              }
+            ]
+          }
+        },
+        {
+          "name": "winner",
+          "docs": [
+            "tournament.proposed_winner inside the instruction body."
+          ],
+          "writable": true
+        },
+        {
+          "name": "organizer",
+          "docs": [
+            "tournament.organizer via the `address` constraint."
+          ],
+          "writable": true
+        },
+        {
+          "name": "signer",
+          "docs": [
+            "Caller who triggers distribution — must be the tournament organizer",
+            "OR the platform authority stored in ArenaState."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "platform_authority",
+          "writable": true
+        },
+        {
+          "name": "org_reputation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103,
+                  95,
+                  114,
+                  101,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament.organizer",
+                "account": "Tournament"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
+      "docs": [
+        "Creates the global ArenaState PDA.",
+        "`authority` — platform wallet that confirms prize distributions.",
+        "`fee_bps`   — stored for future on-chain fee logic (informational in v1)."
+      ],
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "arena_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "authority",
+          "type": "pubkey"
+        },
+        {
+          "name": "fee_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "join_tournament",
+      "docs": [
+        "Player pays `entry_fee` into the escrow and is appended to PlayerList."
+      ],
+      "discriminator": [
+        77,
+        21,
+        212,
+        206,
+        77,
+        82,
+        124,
+        31
+      ],
+      "accounts": [
+        {
+          "name": "arena_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  101,
+                  110,
+                  97,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "tournament",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  117,
+                  114,
+                  110,
+                  97,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament.organizer",
+                "account": "Tournament"
+              },
+              {
+                "kind": "account",
+                "path": "tournament.title",
+                "account": "Tournament"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_list",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "refund_players",
+      "docs": [
+        "If REFUND_TIMEOUT seconds have passed since `created_at` and no winner",
+        "was declared, anyone can call this instruction to refund every player.",
+        "",
+        "The caller must pass all player accounts as `remaining_accounts`, in the",
+        "same order as `player_list.players`, each marked writable."
+      ],
+      "discriminator": [
+        108,
+        189,
+        57,
+        193,
+        96,
+        133,
+        109,
+        249
+      ],
+      "accounts": [
+        {
+          "name": "tournament",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  117,
+                  114,
+                  110,
+                  97,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament.organizer",
+                "account": "Tournament"
+              },
+              {
+                "kind": "account",
+                "path": "tournament.title",
+                "account": "Tournament"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_list",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "start_tournament_early",
+      "docs": [
+        "Organizer closes registration before the tournament is full.",
+        "Requires ≥ 2 players already joined.  After this, `join_tournament`",
+        "will reject new entrants with `RegistrationClosed`."
+      ],
+      "discriminator": [
+        72,
+        16,
+        180,
+        205,
+        216,
+        206,
+        171,
+        184
+      ],
+      "accounts": [
+        {
+          "name": "tournament",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  117,
+                  114,
+                  110,
+                  97,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tournament.organizer",
+                "account": "Tournament"
+              },
+              {
+                "kind": "account",
+                "path": "tournament.title",
+                "account": "Tournament"
+              }
+            ]
+          }
+        },
+        {
+          "name": "organizer",
+          "signer": true,
+          "relations": [
+            "tournament"
+          ]
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ArenaState",
+      "discriminator": [
+        44,
+        127,
+        100,
+        250,
+        115,
+        129,
+        145,
+        183
+      ]
+    },
+    {
+      "name": "OrgReputation",
+      "discriminator": [
+        197,
+        182,
+        201,
+        118,
+        242,
+        243,
+        67,
+        1
+      ]
+    },
+    {
+      "name": "PlayerList",
+      "discriminator": [
+        236,
+        228,
+        0,
+        20,
+        213,
+        244,
+        46,
+        92
+      ]
+    },
+    {
+      "name": "Tournament",
+      "discriminator": [
+        175,
+        139,
+        119,
+        242,
+        115,
+        194,
+        57,
+        92
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidTitle",
+      "msg": "Title must be between 1 and 32 characters"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidEntryFee",
+      "msg": "Entry fee must be greater than 0"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidMaxPlayers",
+      "msg": "Tournament requires at least 2 players"
+    },
+    {
+      "code": 6003,
+      "name": "MaxPlayersExceeded",
+      "msg": "Max players cannot exceed 64"
+    },
+    {
+      "code": 6004,
+      "name": "TournamentNotActive",
+      "msg": "Tournament is not active"
+    },
+    {
+      "code": 6005,
+      "name": "TournamentFull",
+      "msg": "Tournament is full"
+    },
+    {
+      "code": 6006,
+      "name": "AlreadyJoined",
+      "msg": "Player has already joined this tournament"
+    },
+    {
+      "code": 6007,
+      "name": "WinnerNotPlayer",
+      "msg": "Proposed winner is not a registered player in this tournament"
+    },
+    {
+      "code": 6008,
+      "name": "NoWinnerDeclared",
+      "msg": "No winner has been declared yet"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidWinner",
+      "msg": "Winner account does not match the proposed winner"
+    },
+    {
+      "code": 6010,
+      "name": "WinnerAlreadyDeclared",
+      "msg": "A winner has already been declared for this tournament"
+    },
+    {
+      "code": 6011,
+      "name": "RefundNotAvailableYet",
+      "msg": "Refund available only after 3 days with no declared winner"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidPlayerAccounts",
+      "msg": "Provided player accounts do not match the stored player list"
+    },
+    {
+      "code": 6013,
+      "name": "ArithmeticOverflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6014,
+      "name": "Unauthorized",
+      "msg": "Caller is not the organizer or platform authority"
+    },
+    {
+      "code": 6015,
+      "name": "NotEnoughPlayers",
+      "msg": "Need at least 2 players to start tournament early"
+    },
+    {
+      "code": 6016,
+      "name": "RegistrationClosed",
+      "msg": "Tournament registration is closed"
+    },
+    {
+      "code": 6017,
+      "name": "AlreadyClosed",
+      "msg": "Tournament registration is already closed"
+    },
+    {
+      "code": 6018,
+      "name": "TournamentAlreadyFull",
+      "msg": "Tournament is already full; no need to start early"
+    },
+    {
+      "code": 6019,
+      "name": "OrganizerCannotJoin",
+      "msg": "Organizer cannot join their own tournament"
+    }
+  ],
+  "types": [
+    {
+      "name": "ArenaState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Platform wallet that confirms prize distributions."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_bps",
+            "docs": [
+              "Basis points — reserved for future on-chain fee computation."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "total_tournaments",
+            "type": "u64"
+          },
+          {
+            "name": "total_volume",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrgReputation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "organizer",
+            "type": "pubkey"
+          },
+          {
+            "name": "tournaments_created",
+            "type": "u64"
+          },
+          {
+            "name": "tournaments_completed",
+            "type": "u64"
+          },
+          {
+            "name": "reputation_score",
+            "docs": [
+              "+10 per successfully distributed tournament."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlayerList",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tournament",
+            "type": "pubkey"
+          },
+          {
+            "name": "players",
+            "docs": [
+              "Ordered list of player pubkeys. Capacity pre-allocated for max_players."
+            ],
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tournament",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "entry_fee",
+            "type": "u64"
+          },
+          {
+            "name": "max_players",
+            "type": "u8"
+          },
+          {
+            "name": "player_count",
+            "type": "u8"
+          },
+          {
+            "name": "prize_pool",
+            "docs": [
+              "Running sum of all entry fees in the escrow (lamports)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "organizer",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "proposed_winner",
+            "docs": [
+              "Set by declare_winner; confirmed and paid out by distribute_prizes."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Unix timestamp from Clock sysvar at tournament creation."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "completed",
+            "docs": [
+              "True once distribute_prizes succeeds."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "registration_closed",
+            "docs": [
+              "True once organizer calls start_tournament_early (closes registration)."
+            ],
+            "type": "bool"
+          }
+        ]
+      }
+    }
+  ]
+}

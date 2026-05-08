@@ -1,0 +1,46 @@
+# ── Solana keypairs – NEVER COMMIT ─────────────────────────────────────────────
+# Anchor.toml points to ~/.config/solana/id.json (filesystem only, not in repo)
+id.json
+*keypair*.json
+wallet*.json
+
+# ── Anchor / Rust build ─────────────────────────────────────────────────────────
+.anchor/
+target/
+test-ledger/
+
+# ── Node ────────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Vite / frontend build ───────────────────────────────────────────────────────
+dist/
+dist-ssr/
+
+# ── Environment variables ───────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+# .env.example is intentionally kept — it contains no real secrets
+
+# ── Local tooling ───────────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.claude/
+
+# ── OS ──────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Logs & temp ─────────────────────────────────────────────────────────────────
+*.log
+logs/
+*.tmp
+.cache/
+
+# ── Backup files ────────────────────────────────────────────────────────────────
+*.backup
+*.bak

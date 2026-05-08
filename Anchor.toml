@@ -1,0 +1,21 @@
+[features]
+seeds = true
+skip-lint = false
+
+[programs.localnet]
+arena_war = "At428xvcEnhjVXxensriSeXm7hQo6Kzx7KEgTcPW9o3y"
+arena_war_mundial = "5xkEnY6QthFiXSpqCMwBFPVrZNguAWdbcMEJxNKZuZRZ"
+
+[programs.devnet]
+arena_war = "At428xvcEnhjVXxensriSeXm7hQo6Kzx7KEgTcPW9o3y"
+arena_war_mundial = "5xkEnY6QthFiXSpqCMwBFPVrZNguAWdbcMEJxNKZuZRZ"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "wsl -- bash -c \"./node_modules/.bin/ts-mocha -p ./tsconfig.tests.json -t 1000000 'tests/**/*.ts'\""
