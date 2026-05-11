@@ -1,0 +1,1081 @@
+{
+  "address": "4n5GfF9jLSqSruKmdLJ6UsYU57jf5C7Fh9WYoHbmmDb6",
+  "metadata": {
+    "name": "arena_war_mundial",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Arena War Mundial 2026 - Parimutuel Betting on Solana"
+  },
+  "instructions": [
+    {
+      "name": "apostar",
+      "discriminator": [
+        174,
+        120,
+        40,
+        93,
+        101,
+        247,
+        153,
+        111
+      ],
+      "accounts": [
+        {
+          "name": "partido_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  100,
+                  111
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "apuesta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  112,
+                  117,
+                  101,
+                  115,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "usuario"
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "usuario",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_partido_id",
+          "type": "u64"
+        },
+        {
+          "name": "seleccion",
+          "type": {
+            "defined": {
+              "name": "Resultado"
+            }
+          }
+        },
+        {
+          "name": "monto",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "cancelar_partido",
+      "discriminator": [
+        230,
+        173,
+        21,
+        143,
+        81,
+        104,
+        161,
+        240
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "partido_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  100,
+                  111
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "_partido_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "cerrar_apuestas",
+      "discriminator": [
+        144,
+        28,
+        38,
+        229,
+        114,
+        102,
+        162,
+        192
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "partido_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  100,
+                  111
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "_partido_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "cobrar_fee",
+      "discriminator": [
+        44,
+        69,
+        190,
+        1,
+        23,
+        24,
+        21,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "partido_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  100,
+                  111
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_token_account",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "partido_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "crear_partido",
+      "discriminator": [
+        23,
+        186,
+        168,
+        140,
+        55,
+        52,
+        96,
+        113
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "partido_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  100,
+                  111
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdt_mint"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "partido_id",
+          "type": "u64"
+        },
+        {
+          "name": "inicio_unix",
+          "type": "i64"
+        },
+        {
+          "name": "descripcion",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "declarar_resultado",
+      "discriminator": [
+        67,
+        179,
+        142,
+        93,
+        237,
+        130,
+        142,
+        233
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "partido_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  100,
+                  111
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "_partido_id",
+          "type": "u64"
+        },
+        {
+          "name": "resultado",
+          "type": {
+            "defined": {
+              "name": "Resultado"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "inicializar",
+      "discriminator": [
+        38,
+        175,
+        49,
+        47,
+        251,
+        17,
+        202,
+        203
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "admin",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "reclamar_devolucion",
+      "discriminator": [
+        133,
+        55,
+        81,
+        81,
+        199,
+        120,
+        172,
+        110
+      ],
+      "accounts": [
+        {
+          "name": "partido_pool",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  100,
+                  111
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "apuesta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  112,
+                  117,
+                  101,
+                  115,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "usuario"
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "usuario",
+          "signer": true,
+          "relations": [
+            "apuesta"
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "partido_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "reclamar_ganancias",
+      "discriminator": [
+        175,
+        101,
+        58,
+        49,
+        237,
+        200,
+        195,
+        209
+      ],
+      "accounts": [
+        {
+          "name": "partido_pool",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  114,
+                  116,
+                  105,
+                  100,
+                  111
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "apuesta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  112,
+                  117,
+                  101,
+                  115,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "usuario"
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "partido_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "usuario",
+          "signer": true,
+          "relations": [
+            "apuesta"
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "partido_id",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Apuesta",
+      "discriminator": [
+        155,
+        165,
+        34,
+        53,
+        181,
+        45,
+        232,
+        29
+      ]
+    },
+    {
+      "name": "ArenaWarState",
+      "discriminator": [
+        1,
+        145,
+        3,
+        128,
+        33,
+        120,
+        127,
+        140
+      ]
+    },
+    {
+      "name": "PartidoPool",
+      "discriminator": [
+        221,
+        37,
+        28,
+        108,
+        27,
+        85,
+        122,
+        69
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "ApuestasCerradas",
+      "msg": "Las apuestas para este partido ya estan cerradas"
+    },
+    {
+      "code": 6001,
+      "name": "PartidoNoFinalizado",
+      "msg": "El partido aun no ha finalizado"
+    },
+    {
+      "code": 6002,
+      "name": "YaReclamado",
+      "msg": "Ya reclamaste tu premio o devolucion"
+    },
+    {
+      "code": 6003,
+      "name": "NoGanaste",
+      "msg": "No ganaste este partido"
+    },
+    {
+      "code": 6004,
+      "name": "MontoInsuficiente",
+      "msg": "Monto insuficiente, minimo 1 USDT"
+    },
+    {
+      "code": 6005,
+      "name": "NoEresAdmin",
+      "msg": "No eres el administrador"
+    },
+    {
+      "code": 6006,
+      "name": "ResultadoInvalido",
+      "msg": "Resultado invalido"
+    },
+    {
+      "code": 6007,
+      "name": "PartidoCancelado",
+      "msg": "Este partido fue cancelado, reclama devolucion"
+    },
+    {
+      "code": 6008,
+      "name": "PoolVacio",
+      "msg": "El pool ganador esta vacio"
+    }
+  ],
+  "types": [
+    {
+      "name": "Apuesta",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "usuario",
+            "type": "pubkey"
+          },
+          {
+            "name": "partido_id",
+            "type": "u64"
+          },
+          {
+            "name": "seleccion",
+            "type": {
+              "defined": {
+                "name": "Resultado"
+              }
+            }
+          },
+          {
+            "name": "monto",
+            "type": "u64"
+          },
+          {
+            "name": "reclamado",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArenaWarState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_partidos",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EstadoPartido",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Abierto"
+          },
+          {
+            "name": "Cerrado"
+          },
+          {
+            "name": "Finalizado"
+          },
+          {
+            "name": "Cancelado"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PartidoPool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "partido_id",
+            "type": "u64"
+          },
+          {
+            "name": "inicio_unix",
+            "type": "i64"
+          },
+          {
+            "name": "descripcion",
+            "type": "string"
+          },
+          {
+            "name": "pool_local",
+            "type": "u64"
+          },
+          {
+            "name": "pool_empate",
+            "type": "u64"
+          },
+          {
+            "name": "pool_visita",
+            "type": "u64"
+          },
+          {
+            "name": "total_apostado",
+            "type": "u64"
+          },
+          {
+            "name": "estado",
+            "type": {
+              "defined": {
+                "name": "EstadoPartido"
+              }
+            }
+          },
+          {
+            "name": "resultado",
+            "type": {
+              "defined": {
+                "name": "Resultado"
+              }
+            }
+          },
+          {
+            "name": "fee_cobrado",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "vault_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Resultado",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pendiente"
+          },
+          {
+            "name": "Local"
+          },
+          {
+            "name": "Empate"
+          },
+          {
+            "name": "Visita"
+          }
+        ]
+      }
+    }
+  ]
+}
