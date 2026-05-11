@@ -3,8 +3,7 @@ import { AnchorProvider, Program, BN } from '@coral-xyz/anchor'
 import type { AnchorWallet } from '@solana/wallet-adapter-react'
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
 import type { Pick } from '../data/mundial2026'
-import IDL_JSON from '../../target/idl/arena_war_mundial.json'
-
+import IDL_JSON from '../idl/arena_war_mundial.json'
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 export const MUNDIAL_PROGRAM_ID = new PublicKey('5xkEnY6QthFiXSpqCMwBFPVrZNguAWdbcMEJxNKZuZRZ')
