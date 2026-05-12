@@ -212,8 +212,11 @@ async function fetchFromChain(
             ? 'active'
             : 'open'
 
+        const tournamentId = pubkey.toBase58()
+        const savedStream = localStorage.getItem(`stream_${tournamentId}`)
+
         return [{
-          id:              pubkey.toBase58(),
+          id:              tournamentId,
           title,
           entryFee:        entryFee / 1e9,
           maxPlayers,
@@ -228,6 +231,7 @@ async function fetchFromChain(
           createdAt:       new Date(createdAt * 1000).toLocaleDateString('es-MX'),
           likes:            0,
           dislikes:         0,
+          streamUrl:       savedStream || undefined,
         }] satisfies Tournament[]
       } catch {
         return []
@@ -446,6 +450,14 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       const sig = await sendTx(connection, anchorWallet, [ix])
       toast.dismiss(tid)
       toast.success(`Arena creada! TX: ${sig.slice(0, 8)}…`)
+
+      // Guardar streamUrl en localStorage
+      if (p.streamUrl) {
+        const tKey = tPDA.toBase58()
+        localStorage.setItem(`stream_${tKey}`, p.streamUrl)
+        console.log('[arena] Stream URL guardado:', p.streamUrl, 'para torneo:', tKey)
+      }
+
       await fetchOnChainTournaments()
       return true
     } catch (err: any) {
