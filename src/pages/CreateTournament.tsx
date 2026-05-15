@@ -2,6 +2,7 @@ import { useState, type FormEvent }  from 'react'
 import { motion }                    from 'framer-motion'
 import { useWallet }                 from '@solana/wallet-adapter-react'
 import { useTournamentContext }       from '../context/TournamentContext'
+import { useSolPrice }               from '../hooks/useSolPrice'
 
 interface FormState {
   title:      string
@@ -16,6 +17,7 @@ const GAME_MODES = ['FPS Combat', 'Battle Royale', 'MOBA', 'Fighting', 'Strategy
 export default function CreateTournament() {
   const { connected }                        = useWallet()
   const { createTournament, submitting }     = useTournamentContext()
+  const { price: solPrice }                  = useSolPrice()
 
   const [form, setForm] = useState<FormState>({
     title: '', entryFee: '', maxPlayers: '', game: 'FPS Combat', streamUrl: '',
@@ -183,7 +185,7 @@ export default function CreateTournament() {
 
           {/* Creation fee notice */}
           <p className="text-center font-body text-[11px] text-arena-muted/60 pt-1">
-            Creation fee: <span className="text-arena-muted">0.009 SOL</span> ≈ <span className="text-arena-muted">$1.50 USD</span> · one-time anti-spam charge
+            Creation fee: <span className="text-arena-muted">0.009 SOL</span> ≈ <span className="text-arena-muted">${(0.009 * solPrice).toFixed(2)} USD</span> · one-time anti-spam charge
           </p>
         </motion.form>
       </div>

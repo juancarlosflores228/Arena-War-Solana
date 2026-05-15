@@ -3,6 +3,7 @@ import { motion }       from 'framer-motion'
 import { useWallet }    from '@solana/wallet-adapter-react'
 import { useArenaToast }       from '../hooks/useToast'
 import { useTournamentContext } from '../context/TournamentContext'
+import { useSolPrice }         from '../hooks/useSolPrice'
 import type { Tournament } from '../data/tournaments'
 
 const STATUS_CONFIG = {
@@ -20,6 +21,7 @@ export default function TournamentCard({ tournament, index }: Props) {
   const { connected, publicKey } = useWallet()
   const toast          = useArenaToast()
   const { joinTournament, submitting, joinedIds, likeTournament, dislikeTournament } = useTournamentContext()
+  const { price: solPrice } = useSolPrice()
 
   // Layer 1: local UI guard with 2-second cooldown after any attempt
   const [isJoining, setIsJoining] = useState(false)
@@ -157,7 +159,7 @@ export default function TournamentCard({ tournament, index }: Props) {
               <div className="text-right flex-shrink-0">
                 <span className="font-body text-xs text-arena-muted tracking-widest block mb-0.5">PRIZE WON</span>
                 <p className="font-display text-xl text-arena-gold font-bold">{prizePool.toFixed(3)} SOL</p>
-                <p className="font-body text-xs text-arena-muted">≈ ${(prizePool * 150).toFixed(2)} USD</p>
+                <p className="font-body text-xs text-arena-muted">≈ ${(prizePool * solPrice).toFixed(2)} USD</p>
               </div>
             </div>
           </motion.div>
