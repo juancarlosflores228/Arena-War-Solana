@@ -139,27 +139,47 @@ export default function TournamentCard({ tournament, index }: Props) {
             transition={{ delay: 0.1 }}
             className="mb-4 bg-gradient-to-r from-arena-gold/20 to-transparent border-l-4 border-arena-gold rounded-r-lg p-3"
           >
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <span className="font-body text-xs text-arena-gold tracking-widest block mb-1">
-                  🏆 WINNER
-                </span>
-                <p className="font-mono text-xs text-white truncate mb-1">
-                  {proposedWinner.slice(0, 8)}…{proposedWinner.slice(-8)}
-                </p>
-                <a
-                  href={`https://solscan.io/account/${proposedWinner}?cluster=devnet`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-body text-xs text-arena-gold/70 hover:text-arena-gold underline flex items-center gap-1 transition-colors"
-                >
-                  Ver en Solscan ↗
-                </a>
+            {/* Winner address */}
+            <div className="mb-3">
+              <span className="font-body text-xs text-arena-gold tracking-widest block mb-1">
+                🏆 WINNER
+              </span>
+              <p className="font-mono text-xs text-white truncate mb-1">
+                {proposedWinner.slice(0, 8)}…{proposedWinner.slice(-8)}
+              </p>
+              <a
+                href={`https://solscan.io/account/${proposedWinner}?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-body text-xs text-arena-gold/70 hover:text-arena-gold underline flex items-center gap-1 transition-colors"
+              >
+                Ver en Solscan ↗
+              </a>
+            </div>
+
+            {/* Prize breakdown */}
+            <div className="border-t border-arena-gold/20 pt-2 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-body text-xs text-arena-muted tracking-widest">🏆 Winner (80%)</span>
+                <div className="text-right">
+                  <span className="font-display text-sm text-arena-gold font-bold">
+                    {(prizePool * 0.8).toFixed(3)} SOL
+                  </span>
+                  <span className="font-body text-xs text-arena-muted ml-1.5">
+                    ≈ ${(prizePool * 0.8 * solPrice).toFixed(2)}
+                  </span>
+                </div>
               </div>
-              <div className="text-right flex-shrink-0">
-                <span className="font-body text-xs text-arena-muted tracking-widest block mb-0.5">PRIZE WON</span>
-                <p className="font-display text-xl text-arena-gold font-bold">{prizePool.toFixed(3)} SOL</p>
-                <p className="font-body text-xs text-arena-muted">≈ ${(prizePool * solPrice).toFixed(2)} USD</p>
+              <div className="flex items-center justify-between">
+                <span className="font-body text-xs text-arena-muted tracking-widest">👤 Organizer (15%)</span>
+                <div className="text-right">
+                  <span className="font-display text-sm text-white font-bold">
+                    {(prizePool * 0.15).toFixed(3)} SOL
+                  </span>
+                  <span className="font-body text-xs text-arena-muted ml-1.5">
+                    ≈ ${(prizePool * 0.15 * solPrice).toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
           </motion.div>
