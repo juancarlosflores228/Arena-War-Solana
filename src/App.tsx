@@ -4,7 +4,6 @@ import { Toaster } from 'react-hot-toast'
 import { ConnectionProvider, WalletProvider }    from '@solana/wallet-adapter-react'
 import { WalletModalProvider }                   from '@solana/wallet-adapter-react-ui'
 import { PhantomWalletAdapter }                  from '@solana/wallet-adapter-phantom'
-import { clusterApiUrl }                         from '@solana/web3.js'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
 import { TournamentProvider } from './context/TournamentContext'
@@ -18,7 +17,7 @@ import AdminPanel       from './pages/AdminPanel'
 import MundialTab       from './components/Mundial/MundialTab'
 
 export default function App() {
-  const endpoint = useMemo(() => clusterApiUrl('mainnet-beta'), [])
+  const endpoint = useMemo(() => 'https://mainnet.helius-rpc.com/?api-key=b82c6ef8-3fda-4dfb-a818-33342fc750c1', [])
   const wallets  = useMemo(() => [new PhantomWalletAdapter()], [])
 
   return (
