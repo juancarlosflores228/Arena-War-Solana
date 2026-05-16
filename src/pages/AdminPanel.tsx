@@ -1,13 +1,15 @@
-import { useState, useCallback }            from 'react'
-import { motion, AnimatePresence }          from 'framer-motion'
-import { useWallet, useConnection }         from '@solana/wallet-adapter-react'
-import { PublicKey }                        from '@solana/web3.js'
-import { Buffer }                           from 'buffer'
-import { Link }                             from 'react-router-dom'
-import { useTournamentContext }             from '../context/TournamentContext'
-import { PROGRAM_ID }                       from '../lib/anchor'
-import type { Tournament }                  from '../data/tournaments'
-import ConfettiEffect                       from '../components/ConfettiEffect'
+import { useState, useCallback }                        from 'react'
+import { motion, AnimatePresence }                      from 'framer-motion'
+import { useWallet, useConnection, useAnchorWallet }    from '@solana/wallet-adapter-react'
+import { PublicKey, SystemProgram }                     from '@solana/web3.js'
+import { Buffer }                                       from 'buffer'
+import { Link }                                         from 'react-router-dom'
+import { useTournamentContext }                         from '../context/TournamentContext'
+import { PROGRAM_ID, getProgram }                       from '../lib/anchor'
+import type { Tournament }                              from '../data/tournaments'
+import ConfettiEffect                                   from '../components/ConfettiEffect'
+
+const PLATFORM_AUTHORITY = '7hUtdo1NNWLZ5Kb78H4nVDgKhFBdaey4w6k5atvtCKFL'
 
 // ─── PlayerList deserializer ──────────────────────────────────────────────────
 
@@ -58,10 +60,42 @@ async function fetchPlayerList(
 export default function AdminPanel() {
   const { connected, publicKey } = useWallet()
   const { connection }           = useConnection()
+  const anchorWallet             = useAnchorWallet()
   const { tournaments, loading, submitting, declareWinner, distributePrize, startTournamentEarly, refreshTournaments } =
     useTournamentContext()
 
-  const [showConfetti, setShowConfetti] = useState(false)
+  const [showConfetti, setShowConfetti]   = useState(false)
+  const [initializing, setInitializing]   = useState(false)
+  const [initResult, setInitResult]       = useState<{ ok: boolean; msg: string } | null>(null)
+
+  const isPlatformAdmin = publicKey?.toBase58() === PLATFORM_AUTHORITY
+
+  const handleInitialize = async () => {
+    if (!anchorWallet || !publicKey) return
+    setInitializing(true)
+    setInitResult(null)
+    try {
+      const program = getProgram(anchorWallet)
+      const [arenaStatePDA] = PublicKey.findProgramAddressSync(
+        [Buffer.from('arena_state')],
+        PROGRAM_ID,
+      )
+      const tx = await program.methods
+        .initialize(publicKey, 500)
+        .accounts({
+          arenaState:    arenaStatePDA,
+          payer:         publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc()
+      setInitResult({ ok: true, msg: `✅ ArenaState initialized! TX: ${tx.slice(0, 12)}…` })
+    } catch (err: any) {
+      const msg: string = err?.message ?? String(err)
+      setInitResult({ ok: false, msg: `❌ ${msg.length > 120 ? msg.slice(0, 120) + '…' : msg}` })
+    } finally {
+      setInitializing(false)
+    }
+  }
 
   const myTournaments = publicKey
     ? tournaments.filter(t => t.organizerPubkey === publicKey.toBase58())
@@ -124,6 +158,45 @@ export default function AdminPanel() {
             })()}
           </div>
         </motion.div>
+
+        {/* Initialize Platform — visible only to platform authority */}
+        {isPlatformAdmin && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 bg-arena-surface border border-arena-red/30 rounded p-5"
+          >
+            <span className="font-body text-xs text-arena-red tracking-[0.3em] block mb-1">
+              ▶ PLATFORM AUTHORITY
+            </span>
+            <h2 className="font-display font-bold text-lg text-white tracking-wider mb-1">
+              Initialize Platform
+            </h2>
+            <p className="font-body text-xs text-arena-muted mb-4">
+              Crea el ArenaState PDA on-chain. Solo necesita ejecutarse una vez.
+            </p>
+            <button
+              onClick={handleInitialize}
+              disabled={initializing}
+              className="font-display text-xs font-bold tracking-widest px-6 py-3 rounded transition-all duration-200 bg-arena-red hover:bg-arena-red/80 text-white disabled:opacity-50 disabled:cursor-wait"
+            >
+              {initializing ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  INITIALIZING…
+                </span>
+              ) : 'INITIALIZE PLATFORM ◆'}
+            </button>
+            {initResult && (
+              <p className={`mt-3 font-body text-xs ${initResult.ok ? 'text-arena-green' : 'text-arena-red'}`}>
+                {initResult.msg}
+              </p>
+            )}
+          </motion.div>
+        )}
 
         {/* Refresh */}
         <div className="flex justify-end mb-6">
