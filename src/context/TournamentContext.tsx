@@ -73,7 +73,7 @@ async function sendTx(
   })
 
   console.log('[arena] TX enviada:', signature)
-  console.log('[arena] Explorer:', `https://explorer.solana.com/tx/${signature}?cluster=devnet`)
+  console.log('[arena] Explorer:', `https://explorer.solana.com/tx/${signature}?cluster=mainnet`)
 
   // Poll getSignatureStatus instead of confirmTransaction — more reliable on devnet
   for (let i = 0; i < 30; i++) {

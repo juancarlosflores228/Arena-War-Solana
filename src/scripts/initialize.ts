@@ -36,7 +36,7 @@ async function main() {
 
     console.log('✅ Initialize exitoso!')
     console.log('TX:', tx)
-    console.log('Explorar en: https://explorer.solana.com/tx/' + tx + '?cluster=devnet')
+    console.log('Explorar en: https://explorer.solana.com/tx/' + tx + '?cluster=mainnet')
   } catch (err) {
     console.error('Error:', err)
   }

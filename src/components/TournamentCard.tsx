@@ -148,7 +148,7 @@ export default function TournamentCard({ tournament, index }: Props) {
                 {proposedWinner.slice(0, 8)}…{proposedWinner.slice(-8)}
               </p>
               <a
-                href={`https://solscan.io/account/${proposedWinner}?cluster=devnet`}
+                href={`https://solscan.io/account/${proposedWinner}?cluster=mainnet`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-body text-xs text-arena-gold/70 hover:text-arena-gold underline flex items-center gap-1 transition-colors"
