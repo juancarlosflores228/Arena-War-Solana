@@ -18,7 +18,7 @@ import AdminPanel       from './pages/AdminPanel'
 import MundialTab       from './components/Mundial/MundialTab'
 
 export default function App() {
-  const endpoint = useMemo(() => clusterApiUrl('devnet'), [])
+  const endpoint = useMemo(() => clusterApiUrl('mainnet-beta'), [])
   const wallets  = useMemo(() => [new PhantomWalletAdapter()], [])
 
   return (
