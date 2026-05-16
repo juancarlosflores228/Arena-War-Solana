@@ -1,9 +1,10 @@
-import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js'
+import { Connection, PublicKey } from '@solana/web3.js'
 import { AnchorProvider, Program, setProvider } from '@coral-xyz/anchor'
 import type { AnchorWallet } from '@solana/wallet-adapter-react'
+import { Buffer } from 'buffer'
 import IDL_JSON from './arena_war.json'
 
-export const NETWORK = clusterApiUrl('mainnet-beta')
+export const NETWORK = 'https://mainnet.helius-rpc.com/?api-key=b82c6ef8-3fda-4dfb-a818-33342fc750c1'
 export const CONNECTION = new Connection(NETWORK, 'confirmed')
 
 export const PROGRAM_ID = new PublicKey('FD5HxS53UDzVBgCtsR5ats4ouWEL8VBWzyxzGSPhTyYU')
@@ -21,7 +22,7 @@ export function getProvider(wallet: AnchorWallet): AnchorProvider {
 
 export function getProgram(wallet: AnchorWallet): Program {
   const provider = getProvider(wallet)
-  return new Program(IDL, PROGRAM_ID, provider)
+  return new Program(IDL, provider)
 }
 
 export async function getArenaPDA(): Promise<[PublicKey, number]> {
