@@ -3,10 +3,10 @@ import { AnchorProvider, Program, setProvider } from '@coral-xyz/anchor'
 import type { AnchorWallet } from '@solana/wallet-adapter-react'
 import IDL_JSON from './arena_war.json'
 
-export const NETWORK = clusterApiUrl('devnet')
+export const NETWORK = clusterApiUrl('mainnet-beta')
 export const CONNECTION = new Connection(NETWORK, 'confirmed')
 
-export const PROGRAM_ID = new PublicKey('At428xvcEnhjVXxensriSeXm7hQo6Kzx7KEgTcPW9o3y')
+export const PROGRAM_ID = new PublicKey('FD5HxS53UDzVBgCtsR5ats4ouWEL8VBWzyxzGSPhTyYU')
 
 export const IDL = IDL_JSON as any
 
