@@ -87,7 +87,7 @@ export default function AdminPanel() {
           payer:         publicKey,
           systemProgram: SystemProgram.programId,
         })
-        .rpc()
+        .rpc({ skipPreflight: true })
       setInitResult({ ok: true, msg: `✅ ArenaState initialized! TX: ${tx.slice(0, 12)}…` })
     } catch (err: any) {
       const msg: string = err?.message ?? String(err)
