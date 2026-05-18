@@ -1,16 +1,13 @@
-import { motion }   from 'framer-motion'
-import { useWallet } from '@solana/wallet-adapter-react'
-import { Link }      from 'react-router-dom'
-import { TOURNAMENTS } from '../data/tournaments'
-import type { Tournament } from '../data/tournaments'
-import RecentWinners from '../components/RecentWinners'
-
-// Mock: simulate user created first + third, and joined second
-const MOCK_CREATED  = [TOURNAMENTS[0], TOURNAMENTS[2]]
-const MOCK_JOINED   = [TOURNAMENTS[1], TOURNAMENTS[4]]
+import { motion }        from 'framer-motion'
+import { useWallet }     from '@solana/wallet-adapter-react'
+import { Link }          from 'react-router-dom'
+import { useTournamentContext } from '../context/TournamentContext'
+import type { Tournament }     from '../data/tournaments'
+import RecentWinners           from '../components/RecentWinners'
 
 export default function Dashboard() {
-  const { connected, publicKey } = useWallet()
+  const { connected, publicKey }                    = useWallet()
+  const { tournaments, joinedIds, loading }         = useTournamentContext()
 
   const truncate = (pk: string) => `${pk.slice(0, 6)}...${pk.slice(-6)}`
 
@@ -30,15 +27,24 @@ export default function Dashboard() {
             </svg>
           </div>
           <h2 className="font-display font-bold text-2xl text-white tracking-widest mb-3">LOCKED</h2>
-          <p className="font-body text-arena-muted text-sm mb-6">Connect your Phantom wallet to access your dashboard</p>
+          <p className="font-body text-arena-muted text-sm">Connect your Phantom wallet to access your dashboard</p>
         </motion.div>
       </div>
     )
   }
 
+  const myPubkey  = publicKey.toBase58()
+  const created   = tournaments.filter(t => t.organizerPubkey === myPubkey)
+  const joined    = tournaments.filter(t => joinedIds.has(t.id) && t.organizerPubkey !== myPubkey)
+  const activeSol = created
+    .filter(t => t.status !== 'finished')
+    .reduce((sum, t) => sum + t.prizePool, 0)
+  const finished  = created.filter(t => t.status === 'finished').length
+
   return (
     <div className="min-h-screen bg-arena-bg pt-24 pb-20">
       <div className="max-w-5xl mx-auto px-4">
+
         {/* Recent winners carousel */}
         <RecentWinners />
 
@@ -53,11 +59,11 @@ export default function Dashboard() {
             <h1 className="font-display font-bold text-4xl text-white tracking-tight">DASHBOARD</h1>
           </div>
           <div className="font-body text-xs bg-arena-card border border-arena-border rounded px-4 py-2 text-arena-cyan">
-            {truncate(publicKey.toBase58())}
+            {truncate(myPubkey)}
           </div>
         </motion.div>
 
-        {/* Stats overview */}
+        {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -65,10 +71,10 @@ export default function Dashboard() {
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10"
         >
           {[
-            { label: 'CREATED',  value: MOCK_CREATED.length, accent: 'text-arena-red'   },
-            { label: 'JOINED',   value: MOCK_JOINED.length,  accent: 'text-arena-cyan'  },
-            { label: 'EARNINGS', value: '3.2 SOL',           accent: 'text-arena-gold'  },
-            { label: 'WIN RATE', value: '67%',               accent: 'text-arena-green' },
+            { label: 'CREATED',      value: loading ? '…' : created.length,              accent: 'text-arena-red'   },
+            { label: 'JOINED',       value: loading ? '…' : joined.length,               accent: 'text-arena-cyan'  },
+            { label: 'ACTIVE PRIZE', value: loading ? '…' : `${activeSol.toFixed(2)} SOL`, accent: 'text-arena-gold'  },
+            { label: 'COMPLETED',    value: loading ? '…' : finished,                    accent: 'text-arena-green' },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -84,12 +90,17 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Created tournaments */}
-        <Section title="ARENAS CREATED" count={MOCK_CREATED.length} delay={0.2}>
-          {MOCK_CREATED.length === 0 ? (
-            <Empty action={{ label: 'Create your first arena', to: '/create' }} />
+        <Section title="ARENAS CREATED" count={created.length} delay={0.2}>
+          {loading ? (
+            <LoadingSkeleton />
+          ) : created.length === 0 ? (
+            <Empty
+              message="No has creado ninguna arena todavía."
+              action={{ label: 'Crear primera arena', to: '/create' }}
+            />
           ) : (
             <div className="space-y-3">
-              {MOCK_CREATED.map((t, i) => (
+              {created.map((t, i) => (
                 <DashboardRow key={t.id} tournament={t} index={i} role="organizer" />
               ))}
             </div>
@@ -97,25 +108,35 @@ export default function Dashboard() {
         </Section>
 
         {/* Joined tournaments */}
-        <Section title="ARENAS JOINED" count={MOCK_JOINED.length} delay={0.3}>
-          {MOCK_JOINED.length === 0 ? (
-            <Empty action={{ label: 'Browse open arenas', to: '/' }} />
+        <Section title="ARENAS JOINED" count={joined.length} delay={0.3}>
+          {loading ? (
+            <LoadingSkeleton />
+          ) : joined.length === 0 ? (
+            <Empty
+              message="No te has unido a ninguna arena todavía."
+              action={{ label: 'Ver arenas abiertas', to: '/' }}
+            />
           ) : (
             <div className="space-y-3">
-              {MOCK_JOINED.map((t, i) => (
+              {joined.map((t, i) => (
                 <DashboardRow key={t.id} tournament={t} index={i} role="player" />
               ))}
             </div>
           )}
         </Section>
+
       </div>
     </div>
   )
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
-function Section({ title, count, delay, children }: { title: string; count: number; delay: number; children: React.ReactNode }) {
+function Section({
+  title, count, delay, children,
+}: {
+  title: string; count: number; delay: number; children: React.ReactNode
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -134,7 +155,11 @@ function Section({ title, count, delay, children }: { title: string; count: numb
   )
 }
 
-function DashboardRow({ tournament, index, role }: { tournament: Tournament; index: number; role: 'organizer' | 'player' }) {
+function DashboardRow({
+  tournament, index, role,
+}: {
+  tournament: Tournament; index: number; role: 'organizer' | 'player'
+}) {
   const { title, entryFee, playerCount, maxPlayers, prizePool, status, game } = tournament
 
   const STATUS_COLORS = {
@@ -172,7 +197,7 @@ function DashboardRow({ tournament, index, role }: { tournament: Tournament; ind
         </div>
         <div className="text-right">
           <span className="font-body text-xs text-arena-muted block">PRIZE</span>
-          <span className="font-display text-sm text-arena-gold font-semibold">{prizePool.toFixed(1)} SOL</span>
+          <span className="font-display text-sm text-arena-gold font-semibold">{prizePool.toFixed(2)} SOL</span>
         </div>
         <span className={`font-body text-xs tracking-widest px-2 py-1 rounded border ${
           role === 'organizer'
@@ -186,16 +211,34 @@ function DashboardRow({ tournament, index, role }: { tournament: Tournament; ind
   )
 }
 
-function Empty({ action }: { action: { label: string; to: string } }) {
+function Empty({ message, action }: { message: string; action: { label: string; to: string } }) {
   return (
     <div className="text-center py-10 border border-dashed border-arena-border/50 rounded">
-      <p className="font-body text-arena-muted text-sm mb-3">Nothing here yet</p>
+      <p className="font-body text-arena-muted text-sm mb-3">{message}</p>
       <Link
         to={action.to}
         className="font-display text-xs text-arena-red border border-arena-red/30 px-4 py-2 rounded hover:bg-arena-red/10 transition-colors tracking-widest"
       >
         {action.label} →
       </Link>
+    </div>
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[1, 2].map(i => (
+        <div key={i} className="bg-arena-card border border-arena-border rounded p-4 animate-pulse">
+          <div className="flex items-center gap-4">
+            <div className="w-1 h-10 rounded-full bg-arena-border" />
+            <div className="space-y-2">
+              <div className="h-3 w-40 bg-arena-border rounded" />
+              <div className="h-2.5 w-24 bg-arena-border/60 rounded" />
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

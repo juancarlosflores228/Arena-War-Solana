@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { TOURNAMENTS, type Tournament } from '../data/tournaments'
+import type { Tournament } from '../data/tournaments'
 
 type VoteType = 'like' | 'dislike'
 type UserVotes = Record<string, VoteType>
@@ -21,7 +21,7 @@ const saveStoredVotes = (votes: UserVotes) => {
 }
 
 export function useTournaments() {
-  const [tournaments, setTournaments] = useState<Tournament[]>(TOURNAMENTS)
+  const [tournaments, setTournaments] = useState<Tournament[]>([])
   const [userVotes, setUserVotes] = useState<UserVotes>({})
 
   useEffect(() => {
