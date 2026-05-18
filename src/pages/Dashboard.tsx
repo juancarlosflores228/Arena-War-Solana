@@ -3,6 +3,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { Link }      from 'react-router-dom'
 import { TOURNAMENTS } from '../data/tournaments'
 import type { Tournament } from '../data/tournaments'
+import RecentWinners from '../components/RecentWinners'
 
 // Mock: simulate user created first + third, and joined second
 const MOCK_CREATED  = [TOURNAMENTS[0], TOURNAMENTS[2]]
@@ -38,6 +39,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-arena-bg pt-24 pb-20">
       <div className="max-w-5xl mx-auto px-4">
+        {/* Recent winners carousel */}
+        <RecentWinners />
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -12 }}

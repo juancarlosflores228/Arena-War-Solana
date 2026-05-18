@@ -10,6 +10,7 @@ import { TournamentProvider } from './context/TournamentContext'
 import { LangProvider }       from './context/LangContext'
 import Navbar           from './components/Navbar'
 import Footer           from './components/Footer'
+import ActivityFeed     from './components/ActivityFeed'
 import Home             from './pages/Home'
 import CreateTournament from './pages/CreateTournament'
 import Dashboard        from './pages/Dashboard'
@@ -29,15 +30,21 @@ export default function App() {
               <BrowserRouter>
                 <div className="min-h-screen bg-arena-bg font-body text-arena-text flex flex-col">
                   <Navbar />
-                  <main className="flex-1">
-                    <Routes>
-                      <Route path="/"          element={<Home />}             />
-                      <Route path="/create"    element={<CreateTournament />} />
-                      <Route path="/dashboard" element={<Dashboard />}        />
-                      <Route path="/admin"     element={<AdminPanel />}       />
-                      <Route path="/mundial"   element={<MundialTab />}       />
-                    </Routes>
-                  </main>
+                  <div className="flex-1 flex items-start">
+                    <main className="flex-1 min-w-0">
+                      <Routes>
+                        <Route path="/"          element={<Home />}             />
+                        <Route path="/create"    element={<CreateTournament />} />
+                        <Route path="/dashboard" element={<Dashboard />}        />
+                        <Route path="/admin"     element={<AdminPanel />}       />
+                        <Route path="/mundial"   element={<MundialTab />}       />
+                      </Routes>
+                    </main>
+                    {/* Activity sidebar — visible only on XL screens */}
+                    <aside className="hidden xl:flex w-64 flex-shrink-0 sticky top-16 h-[calc(100vh-4rem)]">
+                      <ActivityFeed />
+                    </aside>
+                  </div>
                   <Footer />
                 </div>
               </BrowserRouter>
