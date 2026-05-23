@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useConnection }               from '@solana/wallet-adapter-react'
 import { PROGRAM_ID }                  from '../lib/anchor'
+import { useSolPrice }                 from '../hooks/useSolPrice'
 import {
   fetchActivity,
   getTimeAgo,
@@ -25,6 +26,7 @@ const TYPE_META: Record<ActivityType, { icon: string; label: string; color: stri
 
 export default function ActivityFeed() {
   const { connection }                  = useConnection()
+  const { price: solPrice }             = useSolPrice()
   const [items, setItems]               = useState<ActivityItem[]>([])
   const [loading, setLoading]           = useState(true)
   const [lastUpdated, setLastUpdated]   = useState(0)
@@ -96,11 +98,51 @@ export default function ActivityFeed() {
                       {truncateAddress(item.signer, 5)}
                     </p>
                   )}
+
+                  {/* ── Montos según tipo ── */}
+                  {item.type === 'join' && item.amountSol != null && (
+                    <p className="font-body text-[10px] mt-1 flex items-center gap-1">
+                      <span className="text-arena-muted">Pagó</span>
+                      <span className="text-white font-semibold">{item.amountSol.toFixed(4)} SOL</span>
+                      {solPrice > 0 && (
+                        <span className="text-arena-muted/60">
+                          ≈ ${(item.amountSol * solPrice).toFixed(2)}
+                        </span>
+                      )}
+                    </p>
+                  )}
+
+                  {item.type === 'distribute' && item.amountSol != null && (
+                    <div className="mt-1 bg-arena-green/10 border border-arena-green/20 rounded px-2 py-1">
+                      <p className="font-body text-[10px] flex items-center gap-1">
+                        <span className="text-arena-muted">Ganó</span>
+                        <span className="text-arena-gold font-bold">{item.amountSol.toFixed(4)} SOL</span>
+                        {solPrice > 0 && (
+                          <span className="text-arena-green font-bold">
+                            = ${(item.amountSol * solPrice).toFixed(2)}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {item.type === 'declare' && item.amountSol != null && (
+                    <p className="font-body text-[10px] mt-1 flex items-center gap-1">
+                      <span className="text-arena-muted">Premio</span>
+                      <span className="text-arena-gold font-semibold">{item.amountSol.toFixed(4)} SOL</span>
+                      {solPrice > 0 && (
+                        <span className="text-arena-muted/60">
+                          ≈ ${(item.amountSol * solPrice).toFixed(2)}
+                        </span>
+                      )}
+                    </p>
+                  )}
+
                   <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-body text-[10px] text-arena-muted/50 hover:text-arena-cyan transition-colors mt-0.5 block"
+                    className="font-body text-[10px] text-arena-muted/50 hover:text-arena-cyan transition-colors mt-1 block"
                   >
                     {item.signature.slice(0, 8)}… ↗
                   </a>

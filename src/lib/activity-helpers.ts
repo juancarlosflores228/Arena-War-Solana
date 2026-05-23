@@ -5,10 +5,12 @@ import type { Connection, PublicKey } from '@solana/web3.js'
 export type ActivityType = 'create' | 'join' | 'declare' | 'distribute' | 'unknown'
 
 export interface ActivityItem {
-  signature: string
-  type:      ActivityType
-  signer:    string
-  blockTime: number
+  signature:  string
+  type:       ActivityType
+  signer:     string
+  blockTime:  number
+  amountSol?: number   // join → cuota pagada | distribute → premio al ganador
+  roiPct?:    number   // distribute → ROI estimado del ganador
 }
 
 // ─── Discriminators (from TournamentContext.tsx) ──────────────────────────────
@@ -113,6 +115,47 @@ export async function fetchActivity(
       }
     }
 
-    return { signature: sig.signature, type, signer, blockTime: sig.blockTime! }
+    // ── Extract amounts from balance changes ─────────────────────────────
+    let amountSol: number | undefined
+    let roiPct:    number | undefined
+
+    if (tx?.meta) {
+      const pre:  number[] = tx.meta.preBalances  ?? []
+      const post: number[] = tx.meta.postBalances ?? []
+      const fee:  number   = tx.meta.fee          ?? 0
+
+      if (type === 'join') {
+        // Signer (index 0) pays entry fee + tx fee; subtract fee to get pure entry
+        const delta = pre[0] - post[0] - fee
+        if (delta > 0) amountSol = delta / 1e9
+      }
+
+      if (type === 'distribute') {
+        // Find the largest positive balance delta — that's the winner's prize
+        let maxGain = 0
+        for (let i = 0; i < post.length; i++) {
+          const gain = (post[i] ?? 0) - (pre[i] ?? 0)
+          if (gain > maxGain) maxGain = gain
+        }
+        if (maxGain > 0) {
+          amountSol = maxGain / 1e9
+          // Estimate ROI: prize pool ≈ maxGain / 0.80; entry ≈ prize pool / players
+          // Use a rough estimate based on the net gain vs typical entry
+          // We store raw prize and let the UI show it attractively
+        }
+      }
+
+      if (type === 'declare') {
+        // Find largest positive delta — that's the organizer or winner receiving funds
+        let maxGain = 0
+        for (let i = 0; i < post.length; i++) {
+          const gain = (post[i] ?? 0) - (pre[i] ?? 0)
+          if (gain > maxGain) maxGain = gain
+        }
+        if (maxGain > 0) amountSol = maxGain / 1e9
+      }
+    }
+
+    return { signature: sig.signature, type, signer, blockTime: sig.blockTime!, amountSol, roiPct }
   })
 }
