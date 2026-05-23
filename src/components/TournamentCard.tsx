@@ -186,11 +186,35 @@ export default function TournamentCard({ tournament, index }: Props) {
         )}
 
         {/* Stats grid */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-3 gap-2 mb-3">
           <Stat label="ENTRY" value={`${entryFee} SOL`} highlight />
-          <Stat label="PRIZE" value={`${prizePool.toFixed(1)} SOL`} gold />
+          <Stat label="PRIZE" value={`${prizePool.toFixed(3)} SOL`} gold />
           <Stat label="SLOTS" value={`${playerCount}/${maxPlayers}`} />
         </div>
+
+        {/* ROI + distribución — solo torneos abiertos o en vivo */}
+        {status !== 'finished' && (
+          <div className="flex items-center justify-between mb-4 px-0.5">
+            <div className="flex items-center gap-2 font-body text-xs text-arena-muted">
+              <span className="flex items-center gap-1">
+                <span className="text-[10px]">🏆</span>
+                <span className="text-arena-gold font-bold">80%</span>
+                <span className="text-arena-muted/60">jugador</span>
+              </span>
+              <span className="text-arena-border">|</span>
+              <span className="flex items-center gap-1">
+                <span className="text-[10px]">👤</span>
+                <span className="text-arena-cyan font-bold">15%</span>
+                <span className="text-arena-muted/60">org</span>
+              </span>
+            </div>
+            <span className="font-display text-xs font-bold tracking-wider text-arena-green whitespace-nowrap">
+              +{entryFee > 0
+                  ? (((maxPlayers * entryFee * 0.8) - entryFee) / entryFee * 100).toFixed(0)
+                  : 0}% ROI
+            </span>
+          </div>
+        )}
 
         {streamUrl && (
           <div className="mb-4">
