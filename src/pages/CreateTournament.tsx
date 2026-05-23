@@ -22,6 +22,20 @@ export default function CreateTournament() {
   const [form, setForm] = useState<FormState>({
     title: '', entryFee: '', maxPlayers: '', game: 'FPS Combat', streamUrl: '',
   })
+  const [maxPlayersError, setMaxPlayersError] = useState('')
+
+  const handleMaxPlayersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    setForm(f => ({ ...f, maxPlayers: val }))
+    const n = parseInt(val)
+    if (val && !isNaN(n)) {
+      if (n < 2)        setMaxPlayersError('Mínimo 2 jugadores')
+      else if (n > 64)  setMaxPlayersError('Máximo 64 jugadores (límite del smart contract)')
+      else              setMaxPlayersError('')
+    } else {
+      setMaxPlayersError('')
+    }
+  }
 
   const update = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
@@ -39,7 +53,7 @@ export default function CreateTournament() {
 
     const fee = parseFloat(entryFee)
     const max = parseInt(maxPlayers)
-    if (isNaN(fee) || fee <= 0 || isNaN(max) || max < 2) return
+    if (isNaN(fee) || fee <= 0 || isNaN(max) || max < 2 || max > 64) return
 
     const ok = await createTournament({
       title: title.trim(),
@@ -128,16 +142,23 @@ export default function CreateTournament() {
                 className="w-full bg-arena-surface border border-arena-border focus:border-arena-red rounded px-4 py-3 font-body text-white text-sm placeholder:text-arena-muted/40 outline-none transition-colors"
               />
             </Field>
-            <Field label="MAX PLAYERS" required>
+            <Field label="MAX PLAYERS (2–64)" required>
               <input
                 type="number"
                 value={form.maxPlayers}
-                onChange={update('maxPlayers')}
+                onChange={handleMaxPlayersChange}
                 placeholder="8"
                 min="2"
                 max="64"
-                className="w-full bg-arena-surface border border-arena-border focus:border-arena-red rounded px-4 py-3 font-body text-white text-sm placeholder:text-arena-muted/40 outline-none transition-colors"
+                className={`w-full bg-arena-surface border rounded px-4 py-3 font-body text-white text-sm placeholder:text-arena-muted/40 outline-none transition-colors ${
+                  maxPlayersError ? 'border-arena-red focus:border-arena-red' : 'border-arena-border focus:border-arena-red'
+                }`}
               />
+              {maxPlayersError && (
+                <span className="block font-body text-[11px] text-arena-red mt-1.5">
+                  ⚠ {maxPlayersError}
+                </span>
+              )}
             </Field>
           </div>
 
