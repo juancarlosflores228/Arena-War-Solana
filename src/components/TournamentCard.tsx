@@ -192,29 +192,27 @@ export default function TournamentCard({ tournament, index }: Props) {
           <Stat label="SLOTS" value={`${playerCount}/${maxPlayers}`} />
         </div>
 
-        {/* ROI + distribución — solo torneos abiertos o en vivo */}
-        {status !== 'finished' && (
-          <div className="flex items-center justify-between mb-4 px-0.5">
-            <div className="flex items-center gap-2 font-body text-xs text-arena-muted">
-              <span className="flex items-center gap-1">
-                <span className="text-[10px]">🏆</span>
-                <span className="text-arena-gold font-bold">80%</span>
-                <span className="text-arena-muted/60">jugador</span>
-              </span>
-              <span className="text-arena-border">|</span>
-              <span className="flex items-center gap-1">
-                <span className="text-[10px]">👤</span>
-                <span className="text-arena-cyan font-bold">15%</span>
-                <span className="text-arena-muted/60">org</span>
+        {/* ROI — solo torneos abiertos o en vivo */}
+        {status !== 'finished' && entryFee > 0 && (() => {
+          const maxWin   = maxPlayers * entryFee * 0.8
+          const roi      = ((maxWin - entryFee) / entryFee) * 100
+          const entryUSD = (entryFee * solPrice).toFixed(2)
+          const winUSD   = (maxWin   * solPrice).toFixed(2)
+          return (
+            <div className="flex items-center justify-between mb-4 bg-arena-surface border border-arena-green/20 rounded px-3 py-2">
+              <div className="font-body text-xs flex items-center gap-1.5">
+                <span className="text-arena-muted">Metes</span>
+                <span className="text-white font-semibold">${entryUSD}</span>
+                <span className="text-arena-border">→</span>
+                <span className="text-arena-gold font-bold">${winUSD}</span>
+                <span className="text-arena-muted/60 text-[10px]">si ganas</span>
+              </div>
+              <span className="font-display text-sm font-bold tracking-wider text-arena-green whitespace-nowrap">
+                +{roi.toFixed(0)}% ROI
               </span>
             </div>
-            <span className="font-display text-xs font-bold tracking-wider text-arena-green whitespace-nowrap">
-              +{entryFee > 0
-                  ? (((maxPlayers * entryFee * 0.8) - entryFee) / entryFee * 100).toFixed(0)
-                  : 0}% ROI
-            </span>
-          </div>
-        )}
+          )
+        })()}
 
         {streamUrl && (
           <div className="mb-4">
