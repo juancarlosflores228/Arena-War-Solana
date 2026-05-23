@@ -157,30 +157,42 @@ export default function TournamentCard({ tournament, index }: Props) {
               </a>
             </div>
 
-            {/* Prize breakdown */}
-            <div className="border-t border-arena-gold/20 pt-2 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="font-body text-xs text-arena-muted tracking-widest">🏆 Winner (80%)</span>
-                <div className="text-right">
-                  <span className="font-display text-sm text-arena-gold font-bold">
-                    {(prizePool * 0.8).toFixed(3)} SOL
+            {/* Prize breakdown — ROI style */}
+            <div className="border-t border-arena-gold/20 pt-2 space-y-2">
+
+              {/* Winner ROI */}
+              {(() => {
+                const winnerRoi = entryFee > 0
+                  ? (((prizePool * 0.8) - entryFee) / entryFee * 100).toFixed(0)
+                  : '—'
+                return (
+                  <div className="bg-arena-surface/60 border border-arena-green/20 rounded p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-body text-xs text-arena-gold tracking-widest">🏆 WINNER ROI</span>
+                      <span className="font-display text-sm font-bold text-arena-green">+{winnerRoi}%</span>
+                    </div>
+                    <div className="font-body text-xs flex items-center gap-1.5">
+                      <span className="text-arena-muted">Invirtió</span>
+                      <span className="text-white font-semibold">${(entryFee * solPrice).toFixed(2)}</span>
+                      <span className="text-arena-border mx-0.5">→</span>
+                      <span className="text-arena-gold font-bold">${(prizePool * 0.8 * solPrice).toFixed(2)}</span>
+                      <span className="text-arena-muted/50 text-[10px]">ganado</span>
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Organizer earnings */}
+              <div className="flex items-center justify-between px-1">
+                <span className="font-body text-xs text-arena-muted tracking-widest">👤 Organizador</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-display text-sm text-arena-cyan font-bold">
+                    +${(prizePool * 0.15 * solPrice).toFixed(2)}
                   </span>
-                  <span className="font-body text-xs text-arena-muted ml-1.5">
-                    ≈ ${(prizePool * 0.8 * solPrice).toFixed(2)}
-                  </span>
+                  <span className="font-body text-[10px] text-arena-muted/60">por organizar</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="font-body text-xs text-arena-muted tracking-widest">👤 Organizer (15%)</span>
-                <div className="text-right">
-                  <span className="font-display text-sm text-white font-bold">
-                    {(prizePool * 0.15).toFixed(3)} SOL
-                  </span>
-                  <span className="font-body text-xs text-arena-muted ml-1.5">
-                    ≈ ${(prizePool * 0.15 * solPrice).toFixed(2)}
-                  </span>
-                </div>
-              </div>
+
             </div>
           </motion.div>
         )}
