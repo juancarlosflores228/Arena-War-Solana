@@ -7,6 +7,11 @@ import type { Tournament }     from '../data/tournaments'
 
 interface Props { tournament: Tournament; index: number }
 
+// ─── Prize distribution constants (must match on-chain program) ───────────────
+const WINNER_PCT   = 80
+const ORG_PCT      = 15
+// platform gets the ~5% remainder
+
 export default function TournamentCard({ tournament, index }: Props) {
   const { connected }     = useWallet()
   const toast             = useArenaToast()
@@ -17,6 +22,14 @@ export default function TournamentCard({ tournament, index }: Props) {
   const fillPct = (playerCount / maxPlayers) * 100
   const isFull  = playerCount >= maxPlayers
   const canJoin = status === 'open' && !isFull
+
+  // ROI potencial máximo (torneo lleno, jugador gana 80% del pool total)
+  const maxWin    = maxPlayers * entryFee * (WINNER_PCT / 100)
+  const roi       = entryFee > 0 ? ((maxWin - entryFee) / entryFee) * 100 : 0
+
+  // Montos actuales según el prize pool acumulado
+  const winnerAmt = prizePool * (WINNER_PCT / 100)
+  const orgAmt    = prizePool * (ORG_PCT    / 100)
 
   const STATUS_CONFIG = {
     open:     { label: t.card.statusOpen,     color: 'text-arena-green  border-arena-green/40  bg-arena-green/10'  },
@@ -58,10 +71,38 @@ export default function TournamentCard({ tournament, index }: Props) {
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-3 gap-2 mb-3">
           <Stat label={t.card.entry}  value={`${entryFee} SOL`} highlight />
-          <Stat label={t.card.prize}  value={`${prizePool.toFixed(1)} SOL`} gold />
+          <Stat label={t.card.prize}  value={`${prizePool.toFixed(3)} SOL`} gold />
           <Stat label={t.card.slots}  value={`${playerCount}/${maxPlayers}`} />
+        </div>
+
+        {/* ── ROI + Prize split ─────────────────────────────────── */}
+        <div className="flex items-center justify-between mb-3 px-0.5">
+          {/* Distribución de premios */}
+          <div className="flex items-center gap-2 font-body text-xs text-arena-muted">
+            <span className="flex items-center gap-1">
+              <span className="text-[10px]">🏆</span>
+              <span className="text-arena-gold font-semibold">{t.card.winner}</span>
+              <span className="text-arena-gold font-bold">{WINNER_PCT}%</span>
+              {prizePool > 0 && (
+                <span className="text-arena-muted/70">({winnerAmt.toFixed(3)} SOL)</span>
+              )}
+            </span>
+            <span className="text-arena-border">|</span>
+            <span className="flex items-center gap-1">
+              <span className="text-[10px]">🎯</span>
+              <span className="text-arena-cyan font-semibold">{t.card.orgLabel}</span>
+              <span className="text-arena-cyan font-bold">{ORG_PCT}%</span>
+              {prizePool > 0 && (
+                <span className="text-arena-muted/70">({orgAmt.toFixed(3)} SOL)</span>
+              )}
+            </span>
+          </div>
+          {/* ROI potencial */}
+          <span className="font-display text-xs font-bold tracking-wider text-arena-green whitespace-nowrap">
+            +{roi.toFixed(0)}% ROI
+          </span>
         </div>
 
         <div className="mb-4">

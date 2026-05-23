@@ -34,6 +34,8 @@ const es = {
     statusOpen:     'ABIERTO',
     statusActive:   'EN VIVO',
     statusFinished: 'TERMINADO',
+    winner:         'JUGADOR',
+    orgLabel:       'ORG',
   },
   create: {
     badge:        '▶ CREAR TORNEO',

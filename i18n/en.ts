@@ -36,6 +36,8 @@ const en: Translations = {
     statusOpen:     'OPEN',
     statusActive:   'LIVE',
     statusFinished: 'ENDED',
+    winner:         'PLAYER',
+    orgLabel:       'ORG',
   },
   create: {
     badge:        '▶ TOURNAMENT CREATION',
