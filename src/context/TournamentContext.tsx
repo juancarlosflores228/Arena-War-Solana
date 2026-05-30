@@ -372,7 +372,12 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
         connection, PROGRAM_ID, anchorWallet?.publicKey ?? null,
       )
       console.log('[arena] Loaded', raw.length, 'tournaments,', joined.size, 'joined from chain')
-      setTournaments([...raw].sort((a, b) => b.createdAtTs - a.createdAtTs))
+      const STATUS_ORDER = { open: 0, active: 1, finished: 2 }
+      setTournaments([...raw].sort((a, b) => {
+        const byStatus = STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
+        if (byStatus !== 0) return byStatus
+        return b.createdAtTs - a.createdAtTs   // dentro del mismo estado, más reciente primero
+      }))
       setJoinedIds(joined)
     } catch (err) {
       console.error('[arena] fetchTournaments error:', err)

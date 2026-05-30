@@ -7,7 +7,7 @@ import { useSolPrice }         from '../hooks/useSolPrice'
 import type { Tournament } from '../data/tournaments'
 
 const STATUS_CONFIG = {
-  open:     { label: 'OPEN',     color: 'text-arena-green  border-arena-green/40  bg-arena-green/10'  },
+  open:     { label: 'OPEN 🔥',  color: 'text-arena-green  border-arena-green/40  bg-arena-green/10'  },
   active:   { label: 'LIVE',     color: 'text-arena-gold   border-arena-gold/40   bg-arena-gold/10'   },
   finished: { label: 'ENDED',    color: 'text-arena-muted  border-arena-border    bg-arena-border/40' },
 }
