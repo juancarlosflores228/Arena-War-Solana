@@ -374,9 +374,14 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       console.log('[arena] Loaded', raw.length, 'tournaments,', joined.size, 'joined from chain')
       const STATUS_ORDER = { open: 0, active: 1, finished: 2 }
       setTournaments([...raw].sort((a, b) => {
+        // 1. Estado: open → active → finished
         const byStatus = STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
         if (byStatus !== 0) return byStatus
-        return b.createdAtTs - a.createdAtTs   // dentro del mismo estado, más reciente primero
+        // 2. Más jugadores primero (torneo más activo/relevante al frente)
+        const byPlayers = b.playerCount - a.playerCount
+        if (byPlayers !== 0) return byPlayers
+        // 3. Desempate final: timestamp de creación descendente
+        return (b.createdAtTs || 0) - (a.createdAtTs || 0)
       }))
       setJoinedIds(joined)
     } catch (err) {
