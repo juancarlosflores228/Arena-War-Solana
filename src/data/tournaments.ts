@@ -21,7 +21,8 @@ export interface Tournament {
   proposedWinner?:  string   // pubkey of declared winner, if any
   status:           TournamentStatus
   game:             string
-  createdAt:        string
+  createdAt:        string   // formatted for display
+  createdAtTs:      number   // unix timestamp for sorting
   likes:            number
   dislikes:         number
   streamUrl?:            string

@@ -229,6 +229,7 @@ async function fetchFromChain(
           registrationClosed,
           game:            'FPS Combat',
           createdAt:       new Date(createdAt * 1000).toLocaleDateString('es-MX'),
+          createdAtTs:     createdAt,
           likes:            0,
           dislikes:         0,
           streamUrl:       savedStream || undefined,
@@ -371,7 +372,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
         connection, PROGRAM_ID, anchorWallet?.publicKey ?? null,
       )
       console.log('[arena] Loaded', raw.length, 'tournaments,', joined.size, 'joined from chain')
-      setTournaments(raw)
+      setTournaments([...raw].sort((a, b) => b.createdAtTs - a.createdAtTs))
       setJoinedIds(joined)
     } catch (err) {
       console.error('[arena] fetchTournaments error:', err)
