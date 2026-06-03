@@ -1,26 +1,38 @@
 import { useEffect, useState } from 'react'
 
+async function fetchSolPrice(): Promise<number> {
+  // Primary: Jupiter Aggregator
+  try {
+    const res  = await fetch('https://price.jup.ag/v4/price?ids=SOL')
+    const data = await res.json()
+    const p = data?.data?.SOL?.price
+    if (typeof p === 'number' && p > 0) return p
+  } catch { /* fall through */ }
+
+  // Fallback: Binance
+  try {
+    const res  = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT')
+    const data = await res.json()
+    const p = parseFloat(data?.price)
+    if (!isNaN(p) && p > 0) return p
+  } catch { /* fall through */ }
+
+  return 0 // both APIs down; keep existing price
+}
+
 export function useSolPrice() {
-  const [price, setPrice]     = useState<number>(150) // fallback mientras carga
+  const [price, setPrice]     = useState<number>(73) // fallback mientras carga
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const response = await fetch(
-          'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'
-        )
-        const data = await response.json()
-        setPrice(data.solana.usd)
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching SOL price:', error)
-        setLoading(false)
-      }
+    const refresh = async () => {
+      const p = await fetchSolPrice()
+      if (p > 0) setPrice(p)
+      setLoading(false)
     }
 
-    fetchPrice()
-    const interval = setInterval(fetchPrice, 120_000) // cada 2 min
+    refresh()
+    const interval = setInterval(refresh, 120_000) // cada 2 min
     return () => clearInterval(interval)
   }, [])
 
