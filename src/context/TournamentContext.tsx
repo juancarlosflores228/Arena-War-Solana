@@ -371,11 +371,27 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
   const STATUS_ORDER = { open: 0, active: 1, finished: 2 } as const
 
   function sortTournaments(list: Tournament[]) {
+    const now       = Math.floor(Date.now() / 1000)
+    const THREE_DAYS = 3 * 24 * 60 * 60   // 259 200 segundos
+
     return [...list].sort((a, b) => {
-      const byStatus  = STATUS_ORDER[a.status]  - STATUS_ORDER[b.status]
+      // 1️⃣ Primero por status: open → active → finished
+      const byStatus = STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
       if (byStatus !== 0) return byStatus
+
+      // 2️⃣ Dentro de OPEN: torneos estancados van al fondo
+      //    "estancado" = más de 3 días creado Y menos del 25% lleno
+      if (a.status === 'open' && b.status === 'open') {
+        const aStale = (now - (a.createdAtTs || 0)) > THREE_DAYS && (a.playerCount / a.maxPlayers) < 0.25
+        const bStale = (now - (b.createdAtTs || 0)) > THREE_DAYS && (b.playerCount / b.maxPlayers) < 0.25
+        if (aStale !== bStale) return aStale ? 1 : -1
+      }
+
+      // 3️⃣ Más jugadores primero (más actividad = más arriba)
       const byPlayers = b.playerCount - a.playerCount
       if (byPlayers !== 0) return byPlayers
+
+      // 4️⃣ Más nuevo primero
       return (b.createdAtTs || 0) - (a.createdAtTs || 0)
     })
   }
