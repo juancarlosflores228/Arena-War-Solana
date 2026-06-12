@@ -397,28 +397,19 @@ export default function TournamentCard({ tournament, index }: Props) {
               </button>
 
               {/* Iframe embed — YouTube o Twitch */}
-              <AnimatePresence>
-                {canEmbed && showEmbed && (
-                  <motion.div
-                    key="embed"
-                    initial={{ opacity: 0, scaleY: 0.92 }}
-                    animate={{ opacity: 1, scaleY: 1 }}
-                    exit={{ opacity: 0, scaleY: 0.92 }}
-                    transition={{ duration: 0.25, ease: 'easeOut' }}
-                    style={{ transformOrigin: 'top' }}
-                    className="mt-2 rounded-lg border border-arena-border overflow-hidden"
-                  >
+              {canEmbed && showEmbed && (
+                <div className="mt-2 rounded-lg border border-arena-border overflow-hidden">
+                  <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, width: '100%' }}>
                     <iframe
                       src={embedSrc}
                       title="Stream en vivo"
-                      className="w-full block"
-                      style={{ aspectRatio: '16/9', minHeight: '180px' }}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                       allowFullScreen
                     />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+                </div>
+              )}
             </div>
           )
         })()}
