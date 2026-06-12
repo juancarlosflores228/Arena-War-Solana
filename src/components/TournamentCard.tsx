@@ -75,8 +75,9 @@ export default function TournamentCard({ tournament, index }: Props) {
   const { price: solPrice } = useSolPrice()
 
   // Layer 1: local UI guard with 2-second cooldown after any attempt
-  const [isJoining, setIsJoining]       = useState(false)
+  const [isJoining, setIsJoining]           = useState(false)
   const [showAllPlayers, setShowAllPlayers] = useState(false)
+  const [showEmbed, setShowEmbed]           = useState(false)
 
   const { title, entryFee, maxPlayers, playerCount, prizePool, organizer, status, game, likes, dislikes, streamUrl, organizerReputation, proposedWinner, isLiveUpdating } = tournament
   const vote        = localStorage.getItem(`vote_${tournament.id}`)
@@ -368,19 +369,59 @@ export default function TournamentCard({ tournament, index }: Props) {
           )
         })()}
 
-        {streamUrl && (
-          <div className="mb-4">
-            <a
-              href={streamUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-arena-red px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-white transition hover:bg-arena-red/90"
-            >
-              <span>🔴 EN VIVO</span>
-              <span>{streamPlatform ?? 'LIVE'}</span>
-            </a>
-          </div>
-        )}
+        {streamUrl && (() => {
+          const ytId     = getYouTubeId(streamUrl)
+          const twCh     = getTwitchChannel(streamUrl)
+          const canEmbed = !!(ytId || twCh)
+          const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
+
+          const embedSrc = ytId
+            ? `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1`
+            : twCh
+              ? `https://player.twitch.tv/?channel=${twCh}&parent=${hostname}&autoplay=true&muted=true`
+              : ''
+
+          return (
+            <div className="mb-4">
+              {/* Botón toggle */}
+              <button
+                type="button"
+                onClick={() => canEmbed ? setShowEmbed(p => !p) : window.open(streamUrl, '_blank')}
+                className="inline-flex items-center gap-2 rounded-full bg-arena-red px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-white transition hover:bg-arena-red/90"
+              >
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                <span>EN VIVO {streamPlatform ?? 'LIVE'}</span>
+                {canEmbed && (
+                  <span className="opacity-70">{showEmbed ? '▲' : '▼'}</span>
+                )}
+              </button>
+
+              {/* Iframe embed — YouTube o Twitch */}
+              <AnimatePresence>
+                {canEmbed && showEmbed && (
+                  <motion.div
+                    key="embed"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden mt-2 rounded-lg border border-arena-border"
+                  >
+                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                      <iframe
+                        src={embedSrc}
+                        title="Stream en vivo"
+                        className="absolute inset-0 w-full h-full rounded-lg"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )
+        })()}
 
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <button
@@ -574,9 +615,30 @@ function Stat({ label, value, highlight, gold, danger }: { label: string; value:
 
 function getStreamPlatform(url?: string) {
   if (!url) return null
-  if (/tiktok\.com/i.test(url)) return 'TikTok 🎵'
-  if (/discord\.com/i.test(url)) return 'Discord 🎮'
+  if (/tiktok\.com/i.test(url))          return 'TikTok 🎵'
+  if (/discord\.com/i.test(url))         return 'Discord 🎮'
   if (/youtube\.com|youtu\.be/i.test(url)) return 'YouTube ▶️'
-  if (/twitch\.tv/i.test(url)) return 'Twitch 💜'
+  if (/twitch\.tv/i.test(url))           return 'Twitch 💜'
   return 'LIVE'
+}
+
+/** Extrae el video ID de cualquier formato de URL de YouTube */
+function getYouTubeId(url: string): string | null {
+  const patterns = [
+    /[?&]v=([A-Za-z0-9_-]{11})/,          // watch?v=
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,      // youtu.be/
+    /youtube\.com\/live\/([A-Za-z0-9_-]{11})/, // /live/
+    /youtube\.com\/embed\/([A-Za-z0-9_-]{11})/, // /embed/
+  ]
+  for (const p of patterns) {
+    const m = url.match(p)
+    if (m) return m[1]
+  }
+  return null
+}
+
+/** Extrae el nombre del canal de Twitch */
+function getTwitchChannel(url: string): string | null {
+  const m = url.match(/twitch\.tv\/([A-Za-z0-9_]+)/i)
+  return m ? m[1] : null
 }
