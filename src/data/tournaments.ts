@@ -29,5 +29,6 @@ export interface Tournament {
   players?:              string[]       // full pubkeys from on-chain PlayerList
   organizerReputation?:  OrgReputation  // on-chain OrgReputation account
   registrationClosed?:   boolean        // true when organizer called start_tournament_early
+  isLiveUpdating?:       boolean        // true cuando acaba de recibir actualización en vivo
 }
 

@@ -362,37 +362,104 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
   const [submitting, setSubmitting]   = useState(false)
 
   // useRef guard prevents race-condition double-submit (setState is async, ref is sync)
-  const submittingRef = useRef(false)
+  const submittingRef  = useRef(false)
+  // snapshot of previous state for change-detection
+  const prevSnapshot   = useRef<Map<string, { playerCount: number; status: string; prizePool: number }>>(new Map())
+  // tracks which tournament IDs are currently "live pulsing"
+  const liveTimers     = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
+
+  const STATUS_ORDER = { open: 0, active: 1, finished: 2 } as const
+
+  function sortTournaments(list: Tournament[]) {
+    return [...list].sort((a, b) => {
+      const byStatus  = STATUS_ORDER[a.status]  - STATUS_ORDER[b.status]
+      if (byStatus !== 0) return byStatus
+      const byPlayers = b.playerCount - a.playerCount
+      if (byPlayers !== 0) return byPlayers
+      return (b.createdAtTs || 0) - (a.createdAtTs || 0)
+    })
+  }
+
+  // ── Detect changes vs previous snapshot and flag live-updating ───────────
+  function applyLiveFlags(
+    incoming: Tournament[],
+    isBackground: boolean,
+  ): Tournament[] {
+    const prev = prevSnapshot.current
+    const updated = incoming.map(t => {
+      const snap = prev.get(t.id)
+      if (!snap || !isBackground) return t   // first load → no pulse
+
+      const changed =
+        t.playerCount !== snap.playerCount ||
+        t.status      !== snap.status      ||
+        t.prizePool   !== snap.prizePool
+
+      if (!changed) return t
+
+      // Show toast for meaningful changes
+      if (t.playerCount > snap.playerCount) {
+        const slots = `${t.playerCount}/${t.maxPlayers}`
+        toast.success(`🎮 Nuevo jugador en "${t.title}" (${slots})`, { duration: 3000, id: `join-${t.id}` })
+        if (t.playerCount >= t.maxPlayers)
+          toast(`🔥 "${t.title}" ¡LLENO! El torneo comienza`, { duration: 4000, id: `full-${t.id}` })
+      }
+      if (t.status === 'finished' && snap.status !== 'finished') {
+        toast.success(`🏆 Premios distribuidos en "${t.title}"!`, { duration: 5000, id: `dist-${t.id}` })
+      }
+      if (t.status === 'active' && snap.status === 'open') {
+        toast(`⚔️ "${t.title}" ¡EN VIVO ahora!`, { duration: 4000, id: `live-${t.id}` })
+      }
+
+      // Cancel any previous live timer for this tournament
+      const prev_timer = liveTimers.current.get(t.id)
+      if (prev_timer) clearTimeout(prev_timer)
+
+      return { ...t, isLiveUpdating: true }
+    })
+
+    // Clear isLiveUpdating flag after 2.5s for each flagged card
+    updated.forEach(t => {
+      if (!t.isLiveUpdating) return
+      const timer = setTimeout(() => {
+        setTournaments(cur =>
+          cur.map(x => x.id === t.id ? { ...x, isLiveUpdating: false } : x)
+        )
+      }, 2500)
+      liveTimers.current.set(t.id, timer)
+    })
+
+    // Update snapshot
+    const nextSnap = new Map<string, { playerCount: number; status: string; prizePool: number }>()
+    incoming.forEach(t => nextSnap.set(t.id, { playerCount: t.playerCount, status: t.status, prizePool: t.prizePool }))
+    prevSnapshot.current = nextSnap
+
+    return updated
+  }
 
   // ── Fetch tournaments from chain ─────────────────────────────────────────
-  const fetchOnChainTournaments = async () => {
-    setLoading(true)
+  const fetchOnChainTournaments = async (background = false) => {
+    if (!background) setLoading(true)
     try {
       const { tournaments: raw, joinedIds: joined } = await fetchFromChain(
         connection, PROGRAM_ID, anchorWallet?.publicKey ?? null,
       )
       console.log('[arena] Loaded', raw.length, 'tournaments,', joined.size, 'joined from chain')
-      const STATUS_ORDER = { open: 0, active: 1, finished: 2 }
-      setTournaments([...raw].sort((a, b) => {
-        // 1. Estado: open → active → finished
-        const byStatus = STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
-        if (byStatus !== 0) return byStatus
-        // 2. Más jugadores primero (torneo más activo/relevante al frente)
-        const byPlayers = b.playerCount - a.playerCount
-        if (byPlayers !== 0) return byPlayers
-        // 3. Desempate final: timestamp de creación descendente
-        return (b.createdAtTs || 0) - (a.createdAtTs || 0)
-      }))
+      const withFlags = applyLiveFlags(raw, background)
+      setTournaments(sortTournaments(withFlags))
       setJoinedIds(joined)
     } catch (err) {
       console.error('[arena] fetchTournaments error:', err)
     } finally {
-      setLoading(false)
+      if (!background) setLoading(false)
     }
   }
 
+  // ── Initial load + auto-poll every 20 seconds ────────────────────────────
   useEffect(() => {
-    fetchOnChainTournaments()
+    fetchOnChainTournaments(false)
+    const interval = setInterval(() => fetchOnChainTournaments(true), 20_000)
+    return () => clearInterval(interval)
   // Re-fetch whenever the connected wallet changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anchorWallet?.publicKey?.toBase58()])
@@ -469,7 +536,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
         console.log('[arena] Stream URL guardado:', p.streamUrl, 'para torneo:', tKey)
       }
 
-      await fetchOnChainTournaments()
+      await fetchOnChainTournaments(false)
       return true
     } catch (err: any) {
       toast.dismiss(tid)
@@ -529,7 +596,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       // Optimistically mark as joined immediately so the button flips before the full refresh
       setJoinedIds(prev => new Set(prev).add(t.id))
       // Full chain refresh deferred so the TX has time to propagate
-      setTimeout(() => fetchOnChainTournaments(), 1500)
+      setTimeout(() => fetchOnChainTournaments(true), 1500)
       return true
     } catch (err: any) {
       toast.dismiss(tid)
@@ -573,7 +640,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       const sig = await sendTx(connection, anchorWallet, [ix])
       toast.dismiss(tid)
       toast.success(`Ganador declarado! TX: ${sig.slice(0, 8)}…`)
-      await fetchOnChainTournaments()
+      await fetchOnChainTournaments(false)
       return true
     } catch (err: any) {
       toast.dismiss(tid)
@@ -626,7 +693,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       const sig = await sendTx(connection, anchorWallet, [ix])
       toast.dismiss(tid)
       toast.success(`¡Premios distribuidos! TX: ${sig.slice(0, 8)}…`)
-      await fetchOnChainTournaments()
+      await fetchOnChainTournaments(false)
       return true
     } catch (err: any) {
       toast.dismiss(tid)
@@ -664,7 +731,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       const sig = await sendTx(connection, anchorWallet, [ix])
       toast.dismiss(tid)
       toast.success(`Registro cerrado con ${t.playerCount} jugadores! TX: ${sig.slice(0, 8)}…`)
-      await fetchOnChainTournaments()
+      await fetchOnChainTournaments(false)
       return true
     } catch (err: any) {
       toast.dismiss(tid)
@@ -688,7 +755,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       joinedIds,
       loading,
       submitting,
-      refreshTournaments: fetchOnChainTournaments,
+      refreshTournaments: () => fetchOnChainTournaments(false),
       createTournament,
       joinTournament,
       startTournamentEarly,
