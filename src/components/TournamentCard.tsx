@@ -376,7 +376,7 @@ export default function TournamentCard({ tournament, index }: Props) {
           const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
 
           const embedSrc = ytId
-            ? `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1`
+            ? `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&playsinline=1&rel=0`
             : twCh
               ? `https://player.twitch.tv/?channel=${twCh}&parent=${hostname}&autoplay=true&muted=true`
               : ''
@@ -401,21 +401,21 @@ export default function TournamentCard({ tournament, index }: Props) {
                 {canEmbed && showEmbed && (
                   <motion.div
                     key="embed"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    className="overflow-hidden mt-2 rounded-lg border border-arena-border"
+                    initial={{ opacity: 0, scaleY: 0.92 }}
+                    animate={{ opacity: 1, scaleY: 1 }}
+                    exit={{ opacity: 0, scaleY: 0.92 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    style={{ transformOrigin: 'top' }}
+                    className="mt-2 rounded-lg border border-arena-border overflow-hidden"
                   >
-                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                      <iframe
-                        src={embedSrc}
-                        title="Stream en vivo"
-                        className="absolute inset-0 w-full h-full rounded-lg"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
+                    <iframe
+                      src={embedSrc}
+                      title="Stream en vivo"
+                      className="w-full block"
+                      style={{ aspectRatio: '16/9', minHeight: '180px' }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      allowFullScreen
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
