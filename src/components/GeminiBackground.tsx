@@ -33,13 +33,13 @@ export default function GeminiBackground() {
       color: string
     }
 
-    const dots: Dot[] = Array.from({ length: 220 }, () => {
+    const dots: Dot[] = Array.from({ length: 2000 }, () => {
       // Cluster mostly in upper 65% — sparse toward bottom (like Gemini)
       const yBias = Math.pow(Math.random(), 1.6)
       return {
         x:           Math.random() * W,
         y:           yBias * H * 0.70,
-        r:           Math.random() * 1.6 + 0.25,
+        r:           Math.random() * 1.2 + 0.2,
         baseOpacity: Math.random() * 0.55 + 0.15,
         speed:       Math.random() * 1.5  + 0.4,
         phase:       Math.random() * Math.PI * 2,
@@ -98,7 +98,7 @@ export default function GeminiBackground() {
         ctx.fill()
 
         // Soft halo around larger dots
-        if (d.r > 1.1 && alpha > 0.1) {
+        if (d.r > 1.0 && alpha > 0.25) {
           const halo = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r * 4)
           halo.addColorStop(0,  d.color + (alpha * 0.35) + ')')
           halo.addColorStop(1,  d.color + '0)')
