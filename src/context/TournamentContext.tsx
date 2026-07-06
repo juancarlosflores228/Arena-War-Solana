@@ -200,7 +200,7 @@ async function fetchFromChain(
         const proposedWinner = hasWinner
           ? new PublicKey(d.subarray(off, off + 32)).toBase58()
           : undefined
-        off += 32
+        if (hasWinner) off += 32   // Option<Pubkey>: None = 0 bytes extra, Some = 32 bytes
         const createdAt         = Number(d.readBigInt64LE(off)); off += 8
         // skip bump (1) and completed (1)
         off += 2
