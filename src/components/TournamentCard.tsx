@@ -6,6 +6,69 @@ import { useTournamentContext }         from '../context/TournamentContext'
 import { useSolPrice }                  from '../hooks/useSolPrice'
 import type { Tournament } from '../data/tournaments'
 
+/* ───────────────────────── Age formatter (pump.fun style) ───────────────────────── */
+function formatAge(createdAtTs: number): string {
+  const diffMs  = Date.now() - createdAtTs * 1000
+  const diffSec = Math.floor(diffMs / 1000)
+  const diffMin = Math.floor(diffSec / 60)
+  const diffHrs = Math.floor(diffMin / 60)
+  const diffDays = Math.floor(diffHrs / 24)
+  if (diffMin  < 1)  return `${diffSec}s`
+  if (diffHrs  < 1)  return `${diffMin}m`
+  if (diffDays < 1)  return `${diffHrs}h ${diffMin % 60}m`
+  if (diffDays < 3)  return `${diffDays}d ${diffHrs % 24}h ${diffMin % 60}m`
+  return `${diffDays}d`
+}
+
+/* ───────────────────────── Egg SVG — cracks as tournament ages ───────────────────────── */
+function EggAge({ createdAtTs }: { createdAtTs: number }) {
+  const ageDays      = (Date.now() - createdAtTs * 1000) / (1000 * 60 * 60 * 24)
+  const crackPct     = Math.min(100, (ageDays / 3) * 100)
+  const cracked      = crackPct > 60
+  const age          = formatAge(createdAtTs)
+
+  return (
+    <div className="flex items-center gap-1">
+      <svg width="18" height="21" viewBox="0 0 52 60" fill="none" style={{ filter: cracked ? 'drop-shadow(0 0 4px rgba(255,200,50,0.6))' : undefined }}>
+        <path
+          d="M26 4C14 4 4 18 4 34C4 47 14 56 26 56C38 56 48 47 48 34C48 18 38 4 26 4Z"
+          fill={cracked ? '#f5c842' : '#f0e6c8'}
+          stroke={cracked ? '#c8960a' : '#c8b080'}
+          strokeWidth="1.5"
+        />
+        {crackPct > 20 && (
+          <path
+            d="M22 28 L25 33 L21 38 L26 44 L30 38 L27 33 L30 28"
+            stroke={cracked ? '#8B6000' : '#b09060'}
+            strokeWidth={cracked ? 2 : 1.2}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={Math.min(1, crackPct / 60)}
+          />
+        )}
+        {crackPct > 40 && (
+          <>
+            <path d="M25 33 L18 31" stroke="#8B6000" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.7" />
+            <path d="M27 33 L34 35" stroke="#8B6000" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.7" />
+          </>
+        )}
+        <ellipse cx="19" cy="20" rx="4" ry="6" fill="white" opacity="0.2" transform="rotate(-15 19 20)" />
+        {cracked && (
+          <>
+            <circle cx="22" cy="36" r="2" fill="#333" />
+            <circle cx="30" cy="36" r="2" fill="#333" />
+            <circle cx="22.8" cy="35.2" r="0.7" fill="white" />
+            <circle cx="30.8" cy="35.2" r="0.7" fill="white" />
+            <path d="M22 41 Q26 44 30 41" stroke="#333" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          </>
+        )}
+      </svg>
+      <span className="font-mono text-[10px] text-arena-muted/70">{age}</span>
+    </div>
+  )
+}
+
 const STATUS_CONFIG = {
   open:     { label: 'OPEN 🔥',  color: 'text-arena-green  border-arena-green/40  bg-arena-green/10'  },
   active:   { label: 'LIVE',     color: 'text-arena-gold   border-arena-gold/40   bg-arena-gold/10'   },
@@ -179,7 +242,10 @@ export default function TournamentCard({ tournament, index }: Props) {
         {/* Header row */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div>
-            <span className="block font-body text-xs text-arena-muted tracking-widest mb-1">{game}</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-body text-xs text-arena-muted tracking-widest">{game}</span>
+              {tournament.createdAtTs > 0 && <EggAge createdAtTs={tournament.createdAtTs} />}
+            </div>
             <h3 className="font-display font-bold text-arena-text tracking-wider text-base leading-tight">{title}</h3>
             {organizerReputation && (
               <div className="flex items-center gap-1.5 mt-1">
