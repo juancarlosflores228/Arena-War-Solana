@@ -8,6 +8,7 @@ import '@solana/wallet-adapter-react-ui/styles.css'
 
 import { TournamentProvider } from './context/TournamentContext'
 import { LangProvider }       from './context/LangContext'
+import GeminiBackground from './components/GeminiBackground'
 import Navbar           from './components/Navbar'
 import Footer           from './components/Footer'
 import ActivityFeed     from './components/ActivityFeed'
@@ -28,7 +29,8 @@ export default function App() {
           <TournamentProvider>
             <LangProvider>
               <BrowserRouter>
-                <div className="min-h-screen bg-arena-bg font-body text-arena-text flex flex-col">
+                <div className="min-h-screen font-body text-arena-text flex flex-col" style={{ background: 'transparent' }}>
+                  <GeminiBackground />
                   <Navbar />
                   <div className="flex-1 flex items-start">
                     <main className="flex-1 min-w-0">
