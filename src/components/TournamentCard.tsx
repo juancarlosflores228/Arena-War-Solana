@@ -26,6 +26,7 @@ function EggAge({ createdAtTs }: { createdAtTs: number }) {
   const ageDays      = valid ? (Date.now() - createdAtTs * 1000) / (1000 * 60 * 60 * 24) : 0
   const crackPct     = Math.min(100, (ageDays / 3) * 100)
   const cracked      = crackPct > 60
+  const forgotten    = ageDays >= 10
   const age          = valid ? formatAge(createdAtTs) : 'nuevo'
 
   return (
@@ -66,6 +67,7 @@ function EggAge({ createdAtTs }: { createdAtTs: number }) {
         )}
       </svg>
       <span className="font-mono text-[10px] text-arena-muted/70">{age}</span>
+      {forgotten && <span title="En el olvido...">🕸️</span>}
     </div>
   )
 }
