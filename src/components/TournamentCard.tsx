@@ -22,10 +22,11 @@ function formatAge(createdAtTs: number): string {
 
 /* ───────────────────────── Egg SVG — cracks as tournament ages ───────────────────────── */
 function EggAge({ createdAtTs }: { createdAtTs: number }) {
-  const ageDays      = (Date.now() - createdAtTs * 1000) / (1000 * 60 * 60 * 24)
+  const valid        = createdAtTs > 100_000   // unix ts válido (no es 0 ni basura)
+  const ageDays      = valid ? (Date.now() - createdAtTs * 1000) / (1000 * 60 * 60 * 24) : 0
   const crackPct     = Math.min(100, (ageDays / 3) * 100)
   const cracked      = crackPct > 60
-  const age          = formatAge(createdAtTs)
+  const age          = valid ? formatAge(createdAtTs) : 'nuevo'
 
   return (
     <div className="flex items-center gap-1">
@@ -244,7 +245,7 @@ export default function TournamentCard({ tournament, index }: Props) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="font-body text-xs text-arena-muted tracking-widest">{game}</span>
-              {tournament.createdAtTs > 0 && <EggAge createdAtTs={tournament.createdAtTs} />}
+              <EggAge createdAtTs={tournament.createdAtTs} />
             </div>
             <h3 className="font-display font-bold text-arena-text tracking-wider text-base leading-tight">{title}</h3>
             {organizerReputation && (
